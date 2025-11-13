@@ -7,9 +7,3 @@ export const isProfessor = (req, res, next) => {
 
   next();
 };
-
-//professor
-//  prof@email.com
-//  123456
-//aluno: "email": "thomaz@email.com",
-//senha: "senha123456"
