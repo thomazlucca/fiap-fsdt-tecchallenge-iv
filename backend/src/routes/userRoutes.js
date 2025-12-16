@@ -52,7 +52,7 @@ router.post("/register", auth(), controller.register);
  *      security:
  *        - bearerAuth: []
  *      summary: Lista todos os usuários (autenticado)
- *      description: Retorna os usuários registrados que possuem a mesma role do usuário que pesquisa (professor ou aluno).
+ *      description: Retorna os usuários registrados (somente professor).
  *      responses:
  *        200:
  *          description: Lista de usuários retornada com sucesso
@@ -97,5 +97,29 @@ router.get("/", auth(), isProfessor, controller.list);
  *         description: Erro ao registrar usuário
  */
 router.post("/login", controller.login);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *    tags: [Users]
+ *    summary: Deleta um usuário (somente professor autenticado)
+ *    security:
+ *     - bearerAuth: []
+ *    parameters:
+ *     - in: path
+ *       name: id
+ *       required: true
+ *       schema:
+ *        type: string
+ *    responses:
+ *     200:
+ *      description: Usuário deletado com sucesso
+ *     404:
+ *      description: Usuário não encontrado
+ *     500:
+ *      description: Erro ao deletar Usuário
+ */
+router.delete("/:id", auth(), isProfessor, controller.deleteUser);
 
 export default router;

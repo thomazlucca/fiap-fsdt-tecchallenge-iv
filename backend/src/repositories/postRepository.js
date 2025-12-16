@@ -1,6 +1,6 @@
 import { Post } from "../models/postModel.js";
 
-export const getAllPosts = () => Post.find();
+export const getAllPosts = () => Post.find().populate("autor", "nome");
 export const getPostById = (id) => Post.findById(id);
 export const createPost = (data) => Post.create(data);
 export const editPost = (id, data) =>

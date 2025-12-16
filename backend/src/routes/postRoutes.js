@@ -93,7 +93,7 @@ router.get("/:id", controller.getById);
  *     responses:
  *       201:
  *         description: Post criado com sucesso
- *       403:
+ *       401:
  *         description: Apenas professores podem criar posts
  *       500:
  *         description: Erro ao criar post

@@ -12,7 +12,13 @@ export const getAll = async (req, res) => {
 
 export const create = async (req, res) => {
   try {
-    const newPost = await service.create(req.body);
+    const postData = {
+      ...req.body,
+      autor: req.user.id,
+    };
+    const newPost = await service.create(postData);
+    await newPost.populate("autor", "nome");
+
     res.status(201).json(newPost);
   } catch (error) {
     console.error("Erro ao criar post:", error);

@@ -22,3 +22,5 @@ export const login = async (email, senha) => {
 export const listUsers = () => repository.listUsers();
 
 export const findByEmail = (email) => repository.findByEmail(email);
+
+export const deleteUser = (id) => repository.deleteUser(id);

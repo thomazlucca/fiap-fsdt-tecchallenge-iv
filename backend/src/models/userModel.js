@@ -11,14 +11,12 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Criptografar senha antes de salvar
 userSchema.pre("save", async function (next) {
   if (!this.isModified("senha")) return next();
   this.senha = await bcrypt.hash(this.senha, 10);
   next();
 });
 
-// Comparar senha
 userSchema.methods.compararSenha = function (senhaDigitada) {
   return bcrypt.compare(senhaDigitada, this.senha);
 };

@@ -53,3 +53,15 @@ export const list = async (req, res) => {
     return res.status(500).json({ error: "Erro ao listar usuários." });
   }
 };
+
+export const deleteUser = async (req, res) => {
+  try {
+    const deleteUser = await service.deleteUser(req.params.id);
+    if (!deleteUser) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+    return res.status(200).json({ message: "Usuário deletado com sucesso." });
+  } catch (error) {
+    return res.status(500).json({ error: "Erro ao deletar usuário." });
+  }
+};
