@@ -34,6 +34,7 @@ cd fiap-fsdt-tecchallenge-iv
 
 ```
 cd backend
+npm install
 docker compose up --build
 ```
 
@@ -68,4 +69,32 @@ GET /posts/:id -Detalha um post específico
 
 ---
 
-⚙️ Como Executar o Projeto (Backend)
+⚙️ Como Executar o Projeto (Frontend)
+
+O projeto foi desenvolvido utilizando o Android Studio, criando um dispositivo virtual modelo Pixel 6, rodando android 13.0("Tiramisu").
+
+1️⃣ Com o backend rodando, abra outro terminal e navegue até a pasta:
+
+```
+fiap-fsdt-tecchallenge-iv/frontend-mobile
+```
+
+e execute:
+
+```
+npm install
+
+```
+
+2️⃣ Abra o Android Studio e inicie o dispositivo virtual.
+
+execute:
+
+```
+npx expo start
+
+```
+
+Após carregar, pressione "a" para abrir no dispositivo android
+
+O emulador deve então carregar a aplicação.
