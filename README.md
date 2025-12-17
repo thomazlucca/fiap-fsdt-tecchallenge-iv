@@ -1,4 +1,4 @@
-# 🧠 FIAP - Tech Challenge IV (Backend)
+# 🧠 FIAP - Tech Challenge IV (Backend + Frontend)
 
 ---
 
@@ -11,10 +11,11 @@
 - **JWT (JSON Web Token)** para autenticação
 - **Swagger (swagger-jsdoc + swagger-ui-express)** para documentação da API
 - **Docker / Docker Compose**
+- **React Native / Expo**
 
 ---
 
-⚙️ Como Executar o Projeto
+⚙️ Como Executar o Projeto (Backend)
 
 1️⃣ Pré-requisitos
 
@@ -28,33 +29,43 @@ Docker Compose
 git clone https://github.com/thomazlucca/fiap-fsdt-tecchallenge-iv.git
 cd fiap-fsdt-tecchallenge-iv
 ```
+
 3️⃣ Subir os containers
+
 ```
 cd backend
 docker compose up --build
 ```
+
 4️⃣ Com os containers rodando, executar o seed para criar o primeiro usuário professor.
+
 ```
 node seed.js
 ```
 
 5. Acessar a aplicação
+
 ```
 API:
 http://localhost:3000
 Documentação Swagger:
 http://localhost:3000/api-docs
 ```
+
 🧠 Endpoints Principais
 
-POST	/auth/login  -Autenticação e geração de token
+POST /auth/login -Autenticação e geração de token
 
-POST	/auth/register -Criação de usuário
+POST /auth/register -Criação de usuário
 
-GET	/posts  -Lista todos os posts
+GET /posts -Lista todos os posts
 
-POST	/posts  -Cria um novo post
+POST /posts -Cria um novo post
 
-GET	/posts/:id  -Detalha um post específico
+GET /posts/:id -Detalha um post específico
 
 🔹 Todos os endpoints protegidos exigem o envio de um token JWT no header Authorization.
+
+---
+
+⚙️ Como Executar o Projeto (Backend)
