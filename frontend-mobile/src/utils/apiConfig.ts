@@ -6,7 +6,7 @@ export const API_CONFIG = {
 
   // Alternativas (comente a de cima e descomente uma abaixo se necessário):
   // BASE_URL: 'http://localhost:3000',  // Para iOS Simulator
-  // BASE_URL: 'http://192.168.1.100:3000', // Para dispositivo físico (substitua pelo seu IP)
+  //BASE_URL: 'http://192.168.1.50:3000', // Para dispositivo físico (substitua pelo seu IP)
 
   TIMEOUT: 10000,
 };

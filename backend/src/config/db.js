@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
 
-export const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log("MongoDB conectado com sucesso!");
-  } catch (error) {
-    console.error("Erro ao conectar no MongoDB", error);
-    process.exit(1);
+export async function connectDB() {
+  const uri = process.env.MONGO_URI;
+
+  while (true) {
+    try {
+      await mongoose.connect(uri);
+      console.log("MongoDB conectado");
+      break;
+    } catch (err) {
+      console.error("Erro ao conectar no Mongo, tentando novamente...");
+      await new Promise(res => setTimeout(res, 5000));
+    }
   }
-};
+}

@@ -1,24 +1,77 @@
 import mongoose from "mongoose";
+import "dotenv/config";
+
 import { User } from "./src/models/userModel.js";
+import { Post } from "./src/models/postModel.js";
 
-const run = async () => {
+async function run() {
   try {
-    await mongoose.connect("mongodb://localhost:27017/blogfaseiv");
-    await User.deleteMany({});
+    await mongoose.connect(process.env.MONGO_URI);
 
-    const professor = await User.create({
-      nome: "Professor Admin",
-      email: "prof@email.com",
-      senha: "123456",
-      role: "professor",
-    });
+    //Garante professor
+    let professor = await User.findOne({ email: "prof@email.com" });
 
-    console.log("Professor criado com sucesso:", professor);
+    if (!professor) {
+      professor = await User.create({
+        nome: "Professor Admin",
+        email: "prof@email.com",
+        senha: "123456",
+        role: "professor",
+      });
+      console.log("Professor criado");
+    }
+
+    //Limpa posts antigos (opcional)
+    await Post.deleteMany({ autor: professor._id });
+
+    //Cria posts
+    const posts = await Post.insertMany([
+      {
+        titulo: "Introdução ao Node.js",
+        conteudo: "Conteúdo inicial sobre Node.js...",
+        autor: professor._id,
+      },
+      {
+        titulo: "MongoDB com Mongoose",
+        conteudo: "Como modelar dados usando Mongoose...",
+        autor: professor._id,
+      },
+      {
+        titulo: "Autenticação com JWT",
+        conteudo: "Implementando login seguro com JWT...",
+        autor: professor._id,
+      },
+      {
+        titulo: "Introdução ao Typescript",
+        conteudo: "Conteúdo inicial sobre Typescript...",
+        autor: professor._id,
+      },
+      {
+        titulo: "Introdução ao Docker",
+        conteudo: "Conteúdo inicial sobre Docker...",
+        autor: professor._id,
+      },
+      
+      {
+        titulo: "Introdução ao Linux",
+        conteudo: "Conteúdo inicial sobre Linux...",
+        autor: professor._id,
+      },
+      
+      {
+        titulo: "Introdução ao Javascript",
+        conteudo: "Conteúdo inicial sobre Javascript...",
+        autor: professor._id,
+      },
+    ]);
+
+    console.log(`${posts.length} posts criados com sucesso`);
+
     process.exit(0);
   } catch (error) {
-    console.error("Erro ao criar professor:", error);
+    console.error("Erro na seed:", error);
     process.exit(1);
   }
-};
+}
 
 run();
