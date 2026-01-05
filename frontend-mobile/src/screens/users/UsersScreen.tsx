@@ -14,13 +14,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useAuth } from "../../contexts/AuthContext";
 
 import { userApi } from "../../api/userApi";
 import { User } from "../../api/types/user.types";
 
+type UsersScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Users'>;
+
 const UsersScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<UsersScreenNavigationProp>();
   const { user: currentUser } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);

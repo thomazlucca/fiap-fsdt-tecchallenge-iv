@@ -13,16 +13,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useAuth } from "../../contexts/AuthContext";
 import { postApi } from "../../api/postApi";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 
-type RootStackParamList = {
-  CreatePost: undefined;
-  EditPost: { postId: string };
-  Posts: undefined;
-};
+// Using RootStackParamList from navigation/AppNavigator.tsx
 
 type CreateEditPostScreenRouteProp = RouteProp<
   RootStackParamList,

@@ -6,7 +6,13 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios",
+    "build:all": "eas build --platform all",
+    "build:preview": "eas build --profile preview",
+    "lint": "expo lint",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -25,9 +31,12 @@
     "react-native-vector-icons": "^10.3.0"
   },
   "devDependencies": {
+    "@expo/cli": "^0.22.0",
     "@types/node": "^25.0.3",
     "@types/react": "~19.1.0",
     "@types/react-native": "^0.72.8",
+    "@types/react-native-vector-icons": "^6.4.18",
+    "eas-cli": "^12.0.0",
     "typescript": "~5.9.2"
   },
   "private": true
