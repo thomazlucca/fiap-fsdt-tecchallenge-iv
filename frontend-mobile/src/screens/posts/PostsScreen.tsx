@@ -16,10 +16,14 @@ import { usePosts } from "../../hooks/usePosts";
 import PostItem from "../../components/posts/PostItem";
 import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/AppNavigator";
 import SearchInput from "../../components/common/SearchInput"; // Se tiver
 
+type PostsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Posts'>;
+
 const PostsScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<PostsScreenNavigationProp>();
   const { user, isAuthenticated, signOut } = useAuth();
   const { posts, loading, error, fetchPosts, deletePost } = usePosts();
 

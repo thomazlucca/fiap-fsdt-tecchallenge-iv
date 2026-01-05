@@ -14,7 +14,7 @@ import UserDetailScreen from "../screens/users/UserDetailScreen";
 import TestConnectionScreen from "../screens/TestConnectionScreen";
 
 export type RootStackParamList = {
-  Posts: undefined;
+  Posts: { refresh?: boolean; updatedPostId?: string; newPost?: boolean } | undefined;
   PostDetail: { postId: string };
   Login: undefined;
   Register: undefined;

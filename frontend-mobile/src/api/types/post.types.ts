@@ -10,7 +10,7 @@ export interface Post {
 export interface CreatePostData {
   titulo: string;
   conteudo: string;
-  autor: string;
+  autor?: string; // Opcional - backend pega do token
 }
 
 export interface UpdatePostData extends Partial<CreatePostData> {}

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { postApi } from "../api/postApi";
-import { Post } from "../api/types/api.types";
+import { Post } from "../api/types/post.types";
 import { API_CONFIG } from "../utils/apiConfig";
 
 const TestConnectionScreen: React.FC = () => {

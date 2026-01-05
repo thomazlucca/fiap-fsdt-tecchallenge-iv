@@ -4,11 +4,4 @@ export interface ApiResponse<T = any> {
   message?: string;
 }
 
-export interface Post {
-  _id: string;
-  titulo: string;
-  conteudo: string;
-  autor: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// Post type moved to post.types.ts to avoid conflicts

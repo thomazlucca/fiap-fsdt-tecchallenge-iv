@@ -13,7 +13,7 @@ interface AuthContextData {
   user: User | null;
   isAuthenticated: boolean;
   isProfessor: boolean;
-  bootstrapping: boolean;
+  loading: boolean; // Renomeado de bootstrapping para loading
   authLoading: boolean;
   signIn: (
     credentials: LoginCredentials
@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated,
         isProfessor,
-        bootstrapping,
+        loading: bootstrapping, // Mapeando bootstrapping para loading
         authLoading,
         signIn,
         signOut,
