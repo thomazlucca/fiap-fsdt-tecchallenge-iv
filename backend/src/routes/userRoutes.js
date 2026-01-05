@@ -23,13 +23,13 @@ const router = Router();
  *          properties:
  *            nome:
  *              type: string
- *              example: João Silva
+ *              example: Aluno Teste
  *            email:
  *              type: string
- *              example: email@email.com
+ *              example: aluno@email.com
  *            senha:
  *              type: string
- *              example: senha123
+ *              example: 123456
  *            role:
  *              type: string
  *              enum: [aluno, professor]
@@ -51,15 +51,18 @@ router.post("/register", auth(), controller.register);
  *      tags: [Users]
  *      security:
  *        - bearerAuth: []
- *      summary: Lista todos os usuários (autenticado)
- *      description: Retorna os usuários registrados (somente professor).
+ *      summary: Lista usuários conforme permissão
+ *      description: |
+ *        Retorna os usuários registrados conforme o role do usuário autenticado:
+ *        - Professores veem todos os usuários (alunos e professores)
+ *        - Alunos veem apenas outros alunos
  *      responses:
  *        200:
  *          description: Lista de usuários retornada com sucesso
  *        500:
  *          description: Erro ao listar usuários
  */
-router.get("/", auth(), isProfessor, controller.list);
+router.get("/", auth(), controller.list);
 
 /**
  * @swagger
@@ -77,10 +80,10 @@ router.get("/", auth(), isProfessor, controller.list);
  *             properties:
  *               email:
  *                 type: string
- *                 example: email@email.com
+ *                 example: aluno@email.com
  *               senha:
  *                 type: string
- *                 example: senha123
+ *                 example: 123456
  *     responses:
  *       200:
  *         description: Login efetuado com sucesso
@@ -97,6 +100,71 @@ router.get("/", auth(), isProfessor, controller.list);
  *         description: Erro ao registrar usuário
  */
 router.post("/login", controller.login);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Atualiza um usuário
+ *     description: |
+ *       Atualiza os dados de um usuário.
+ *       - Alunos só podem editar seu próprio perfil e não podem alterar o role
+ *       - Professores só podem editar outros professores
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário a ser atualizado
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nome:
+ *                 type: string
+ *                 example: João Silva ALTERADO
+ *               email:
+ *                 type: string
+ *                 example: emailnovo@email.com
+ *               senha:
+ *                 type: string
+ *                 example: 654321
+ *               role:
+ *                 type: string
+ *                 enum: [aluno, professor]
+ *                 example: aluno
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 usuario:
+ *                   type: object
+ *       403:
+ *         description: |
+ *           Permissão negada. Possíveis motivos:
+ *           - Aluno tentando editar outro usuário
+ *           - Aluno tentando alterar role
+ *           - Professor tentando editar aluno
+ *           - Email já está em uso
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro ao atualizar usuário
+ */
+router.put("/:id", auth(), controller.updateUser);
 
 /**
  * @swagger

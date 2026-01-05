@@ -46,11 +46,44 @@ export const login = async (req, res) => {
 
 export const list = async (req, res) => {
   try {
-    const users = await service.listUsers();
+    // Obtém o role do usuário autenticado
+    const userRole = req.user.role;
+    
+    // Passa o role para o service
+    const users = await service.listUsers(userRole);
+    
     return res.status(200).json(users);
   } catch (error) {
-    console.error("Erro ao listar usuários.");
+    console.error("Erro ao listar usuários:", error);
     return res.status(500).json({ error: "Erro ao listar usuários." });
+  }
+};
+
+export const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authenticatedUser = req.user; // Usuário autenticado (do token)
+    
+    // Chama o service passando o usuário autenticado
+    const updatedUser = await service.updateUser(id, req.body, authenticatedUser);
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+    
+    return res.status(200).json({
+      message: "Usuário atualizado com sucesso",
+      usuario: updatedUser
+    });
+  } catch (error) {
+    console.error("Erro no controller ao atualizar usuário:", error);
+    
+    // Tratamento de erros específicos
+    if (error.message === "Usuário não encontrado") {
+      return res.status(404).json({ error: error.message });
+    }
+        
+    return res.status(500).json({ error: "Erro ao atualizar usuário." });
   }
 };
 

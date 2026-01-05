@@ -21,6 +21,18 @@ async function run() {
       console.log("Professor criado");
     }
 
+    let aluno = await User.findOne({ email: "aluno@email.com" });
+
+    if (!aluno) {
+      aluno = await User.create({
+        nome: "Aluno",
+        email: "aluno@email.com",
+        senha: "123456",
+        role: "aluno",
+      });
+      console.log("Aluno criado");
+    }
+
     //Limpa posts antigos (opcional)
     await Post.deleteMany({ autor: professor._id });
 
