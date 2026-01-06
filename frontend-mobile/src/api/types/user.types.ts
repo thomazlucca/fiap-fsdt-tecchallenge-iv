@@ -10,7 +10,7 @@ export interface User {
 export interface CreateUserDto {
   nome: string;
   email: string;
-  password: string;
+  senha: string;
   role: "aluno" | "professor";
 }
 

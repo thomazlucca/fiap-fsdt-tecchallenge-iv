@@ -99,15 +99,15 @@ const PostsScreen = () => {
       </View>
 
       <View style={styles.headerActions}>
-        {/* Botão de gerenciar usuários (apenas para professores logados) */}
-        {/* {isAuthenticated && user?.role === "professor" && ( */}
+        {/* Botão de visualizar usuários (disponível para todos logados) */}
+        {isAuthenticated && (
           <TouchableOpacity
             onPress={handleManageUsers}
             style={styles.usersButton}
           >
             <Ionicons name="people-outline" size={24} color="#3498db" />
           </TouchableOpacity>
-        {/* )} */}
+        )}
 
         {/* Botão de login/logout */}
         <TouchableOpacity onPress={handleAuthAction} style={styles.authButton}>
@@ -200,7 +200,6 @@ const PostsScreen = () => {
   );
 };
 
-// Mantenha os styles existentes...
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -232,8 +231,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   usersButton: {
+    flexDirection: "row",
+    alignItems: "center",
     padding: 8,
     marginRight: 8,
+  },
+  usersButtonText: {
+    color: "#3498db",
+    fontSize: 12,
+    marginLeft: 4,
   },
   authButton: {
     padding: 8,

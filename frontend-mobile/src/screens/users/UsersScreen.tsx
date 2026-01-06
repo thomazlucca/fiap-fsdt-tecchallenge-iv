@@ -21,7 +21,10 @@ import { useAuth } from "../../contexts/AuthContext";
 import { userApi } from "../../api/userApi";
 import { User } from "../../api/types/user.types";
 
-type UsersScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Users'>;
+type UsersScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Users"
+>;
 
 const UsersScreen = () => {
   const navigation = useNavigation<UsersScreenNavigationProp>();
@@ -34,6 +37,9 @@ const UsersScreen = () => {
   const [filterRole, setFilterRole] = useState<"all" | "aluno" | "professor">(
     "all"
   );
+
+  // Verificar permissões
+  const isProfessor = currentUser?.role === "professor";
 
   // Buscar usuários
   const fetchUsers = useCallback(async () => {
@@ -56,20 +62,68 @@ const UsersScreen = () => {
     }, [fetchUsers])
   );
 
+  const handleCreateUser = (): void => {
+    navigation.navigate("CreateUser");
+  };
+
+  const handleUserPress = (user: User): void => {
+    // Verificar se pode editar este usuário
+    const canEditUser = () => {
+      if (!currentUser) return false;
+      
+      // Se for o próprio usuário, pode editar
+      if (currentUser._id === user._id) return true;
+      
+      // Professor pode editar qualquer um
+      if (isProfessor) return true;
+      
+      // Aluno só pode editar outros alunos
+      if (currentUser.role === "aluno" && user.role === "aluno") {
+        return true;
+      }
+      
+      return false;
+    };
+    
+    if (canEditUser()) {
+      navigation.navigate("UserDetail", { userId: user._id });
+    } else {
+      // Mostrar informações básicas sem opção de editar
+      Alert.alert(
+        user.nome,
+        `Email: ${user.email}\nTipo: ${user.role === "professor" ? "Professor 👨‍🏫" : "Aluno 👨‍🎓"}\n\nApenas professores podem editar outros professores.`,
+        [{ text: "OK" }]
+      );
+    }
+  };
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchUsers();
     setRefreshing(false);
   };
 
+  // Verificar se pode excluir usuário
+  const canDeleteUser = (userId: string, userRole: string): boolean => {
+    if (!currentUser) return false;
+    
+    // Não pode excluir a si mesmo
+    if (userId === currentUser._id) return false;
+    
+    // Professor pode excluir qualquer um
+    if (isProfessor) return true;
+    
+    // Aluno não pode excluir ninguém
+    return false;
+  };
+
   // Excluir usuário
   const handleDeleteUser = useCallback(
     async (userId: string, userName: string) => {
-      // Não permitir excluir a si mesmo
-      if (userId === currentUser?._id) {
+      if (!canDeleteUser(userId, "")) {
         Alert.alert(
           "Ação não permitida",
-          "Você não pode excluir sua própria conta"
+          "Você não tem permissão para excluir este usuário"
         );
         return;
       }
@@ -96,7 +150,7 @@ const UsersScreen = () => {
         ]
       );
     },
-    [currentUser?._id, fetchUsers]
+    [currentUser, fetchUsers]
   );
 
   // Filtrar usuários
@@ -125,46 +179,73 @@ const UsersScreen = () => {
     alunos: users.filter((u) => u.role === "aluno").length,
   };
 
-  const renderUserItem = ({ item }: { item: User }) => (
-    <TouchableOpacity
-      style={styles.userItem}
-      onPress={() => navigation.navigate("UserDetail", { userId: item._id })}
-    >
-      <View style={styles.userAvatar}>
-        <Text style={styles.avatarText}>
-          {item.nome.charAt(0).toUpperCase()}
-        </Text>
-      </View>
+  const renderUserItem = ({ item }: { item: User }) => {
+    // Verificar se pode excluir este usuário
+    const showDeleteButton = canDeleteUser(item._id, item.role);
+    
+    // Verificar se pode editar (para badge visual)
+    const canEdit = () => {
+      if (!currentUser) return false;
+      if (currentUser._id === item._id) return true;
+      if (isProfessor) return true;
+      if (currentUser.role === "aluno" && item.role === "aluno") return true;
+      return false;
+    };
 
-      <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.nome}</Text>
-        <Text style={styles.userEmail}>{item.email}</Text>
-        <View style={styles.userMeta}>
-          <Text
-            style={[
-              styles.userRole,
-              { color: item.role === "professor" ? "#e74c3c" : "#3498db" },
-            ]}
-          >
-            {item.role === "professor" ? "👨‍🏫 Professor" : "👨‍🎓 Aluno"}
+    return (
+      <TouchableOpacity
+        style={styles.userItem}
+        onPress={() => handleUserPress(item)}
+      >
+        <View style={styles.userAvatar}>
+          <Text style={styles.avatarText}>
+            {item.nome.charAt(0).toUpperCase()}
           </Text>
-          <Text style={styles.userDate}>
-            Criado: {new Date(item.createdAt).toLocaleDateString("pt-BR")}
-          </Text>
+          {item._id === currentUser?._id && (
+            <View style={styles.currentUserIndicator}>
+              <Ionicons name="person" size={12} color="#fff" />
+            </View>
+          )}
+          {canEdit() && item._id !== currentUser?._id && (
+            <View style={styles.editableIndicator}>
+              <Ionicons name="create-outline" size={10} color="#fff" />
+            </View>
+          )}
         </View>
-      </View>
 
-      {/* Botão de excluir (não mostrar para o próprio usuário) */}
-      {item._id !== currentUser?._id && (
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => handleDeleteUser(item._id, item.nome)}
-        >
-          <Ionicons name="trash-outline" size={20} color="#e74c3c" />
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-  );
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>
+            {item.nome}
+            {item._id === currentUser?._id && " (Você)"}
+          </Text>
+          <Text style={styles.userEmail}>{item.email}</Text>
+          <View style={styles.userMeta}>
+            <Text
+              style={[
+                styles.userRole,
+                { color: item.role === "professor" ? "#e74c3c" : "#3498db" },
+              ]}
+            >
+              {item.role === "professor" ? "👨‍🏫 Professor" : "👨‍🎓 Aluno"}
+            </Text>
+            <Text style={styles.userDate}>
+              Criado: {new Date(item.createdAt).toLocaleDateString("pt-BR")}
+            </Text>
+          </View>
+        </View>
+
+        {/* Botão de excluir (apenas para professores e não para si mesmo) */}
+        {showDeleteButton && (
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => handleDeleteUser(item._id, item.nome)}
+          >
+            <Ionicons name="trash-outline" size={20} color="#e74c3c" />
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -180,7 +261,9 @@ const UsersScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>👥 Gerenciar Usuários</Text>
+        <Text style={styles.title}>
+          {isProfessor ? "👥 Gerenciar Usuários" : "👥 Usuários do Sistema"}
+        </Text>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
@@ -258,6 +341,16 @@ const UsersScreen = () => {
         </View>
       </View>
 
+      {/* Aviso de permissões */}
+      {!isProfessor && (
+        <View style={styles.permissionWarning}>
+          <Ionicons name="information-circle-outline" size={18} color="#3498db" />
+          <Text style={styles.permissionWarningText}>
+            Você pode editar apenas usuários alunos (incluindo você mesmo).
+          </Text>
+        </View>
+      )}
+
       {/* Lista de usuários */}
       <FlatList
         data={filteredUsers}
@@ -282,6 +375,13 @@ const UsersScreen = () => {
           </View>
         }
       />
+      
+      {/* Botão flutuante para criar usuário (apenas professores) */}
+      {isProfessor && (
+        <TouchableOpacity style={styles.fab} onPress={handleCreateUser}>
+          <Ionicons name="person-add" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
@@ -399,6 +499,22 @@ const styles = StyleSheet.create({
     color: "#2c3e50",
     marginLeft: 8,
   },
+  permissionWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e3f2fd",
+    padding: 12,
+    marginHorizontal: 20,
+    marginTop: 15,
+    marginBottom: 10,
+    borderRadius: 8,
+    gap: 8,
+  },
+  permissionWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#1976d2",
+  },
   userItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -421,11 +537,38 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
+    position: "relative",
   },
   avatarText: {
     color: "#fff",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  currentUserIndicator: {
+    position: "absolute",
+    bottom: -5,
+    right: -5,
+    backgroundColor: "#2ecc71",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  editableIndicator: {
+    position: "absolute",
+    top: -5,
+    right: -5,
+    backgroundColor: "#f39c12",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   userInfo: {
     flex: 1,
@@ -481,6 +624,22 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
     marginTop: 16,
     textAlign: "center",
+  },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 30,
+    backgroundColor: "#3498db",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
 });
 

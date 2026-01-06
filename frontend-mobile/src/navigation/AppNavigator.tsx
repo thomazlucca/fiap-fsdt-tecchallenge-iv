@@ -12,9 +12,12 @@ import RegisterScreen from "../screens/auth/RegisterScreen";
 import UsersScreen from "../screens/users/UsersScreen";
 import UserDetailScreen from "../screens/users/UserDetailScreen";
 import TestConnectionScreen from "../screens/TestConnectionScreen";
+import CreateUserScreen from "../screens/users/CreateUserScreen";
 
 export type RootStackParamList = {
-  Posts: { refresh?: boolean; updatedPostId?: string; newPost?: boolean } | undefined;
+  Posts:
+    | { refresh?: boolean; updatedPostId?: string; newPost?: boolean }
+    | undefined;
   PostDetail: { postId: string };
   Login: undefined;
   Register: undefined;
@@ -23,17 +26,20 @@ export type RootStackParamList = {
   Users: undefined;
   UserDetail: { userId: string };
   TestConnection: undefined;
+  CreateUser: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator: React.FC = () => {
-  const { isProfessor, loading } = useAuth();
+  const { user, loading } = useAuth(); // Mudei para pegar user completo
 
   // ⏳ Aguarda carregar usuário do AsyncStorage
   if (loading) {
     return null; // pode colocar splash depois
   }
+
+  const isProfessor = user?.role === "professor";
 
   return (
     <NavigationContainer>
@@ -77,6 +83,19 @@ const AppNavigator: React.FC = () => {
           options={{ title: "Teste de Conexão" }}
         />
 
+        {/* 🔐 TELA USERS - disponível para todos logados */}
+        <Stack.Screen
+          name="Users"
+          component={UsersScreen}
+          options={{ title: "Usuários" }}
+        />
+
+        <Stack.Screen
+          name="UserDetail"
+          component={UserDetailScreen}
+          options={{ title: "Detalhes do Usuário" }}
+        />
+
         {/* 🔐 TELAS RESTRITAS (somente professor) */}
         {isProfessor && (
           <>
@@ -93,15 +112,9 @@ const AppNavigator: React.FC = () => {
             />
 
             <Stack.Screen
-              name="Users"
-              component={UsersScreen}
-              options={{ title: "Gerenciar Usuários" }}
-            />
-
-            <Stack.Screen
-              name="UserDetail"
-              component={UserDetailScreen}
-              options={{ title: "Detalhes do Usuário" }}
+              name="CreateUser"
+              component={CreateUserScreen}
+              options={{ title: "Criar Usuário" }}
             />
           </>
         )}
