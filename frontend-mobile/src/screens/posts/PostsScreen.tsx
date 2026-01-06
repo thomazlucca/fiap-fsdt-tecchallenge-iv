@@ -100,14 +100,14 @@ const PostsScreen = () => {
 
       <View style={styles.headerActions}>
         {/* Botão de gerenciar usuários (apenas para professores logados) */}
-        {isAuthenticated && user?.role === "professor" && (
+        {/* {isAuthenticated && user?.role === "professor" && ( */}
           <TouchableOpacity
             onPress={handleManageUsers}
             style={styles.usersButton}
           >
             <Ionicons name="people-outline" size={24} color="#3498db" />
           </TouchableOpacity>
-        )}
+        {/* )} */}
 
         {/* Botão de login/logout */}
         <TouchableOpacity onPress={handleAuthAction} style={styles.authButton}>
