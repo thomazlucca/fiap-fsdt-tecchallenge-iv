@@ -66,6 +66,59 @@ router.get("/", auth(), controller.list);
 
 /**
  * @swagger
+ * /users/{id}:
+ *   get:
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     summary: Busca um usuário por ID
+ *     description: |
+ *       Retorna os dados de um usuário específico conforme permissões:
+ *       - Professores podem ver qualquer usuário (alunos e professores)
+ *       - Alunos podem ver apenas outros alunos
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do usuário a ser buscado
+ *     responses:
+ *       200:
+ *         description: Usuário encontrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 nome:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                   enum: [aluno, professor]
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *       403:
+ *         description: |
+ *           Permissão negada. Possíveis motivos:
+ *           - Aluno tentando visualizar professor
+ *       404:
+ *         description: Usuário não encontrado
+ *       500:
+ *         description: Erro ao buscar usuário
+ */
+router.get("/:id", auth(), controller.getUserById);
+
+/**
+ * @swagger
  * /users/login:
  *   post:
  *     tags: [Users]

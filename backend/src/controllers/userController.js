@@ -87,6 +87,35 @@ export const updateUser = async (req, res) => {
   }
 };
 
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const authenticatedUser = req.user; // Usuário autenticado (do token)
+    
+    // Chama o service passando o usuário autenticado
+    const user = await service.getUserById(id, authenticatedUser);
+    
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Erro no controller ao buscar usuário:", error);
+    
+    // Tratamento de erros específicos
+    if (error.message === "Usuário não encontrado") {
+      return res.status(404).json({ error: error.message });
+    }
+    
+    if (error.message.includes("permissão")) {
+      return res.status(403).json({ error: error.message });
+    }
+        
+    return res.status(500).json({ error: "Erro ao buscar usuário." });
+  }
+};
+
 export const deleteUser = async (req, res) => {
   try {
     const deleteUser = await service.deleteUser(req.params.id);

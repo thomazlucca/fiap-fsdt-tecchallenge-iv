@@ -82,4 +82,32 @@ export const updateUser = async (id, data, authenticatedUser) => {
   }
 };
 
+export const getUserById = async (id, authenticatedUser) => {
+  try {
+    const user = await repository.getUserById(id);
+    if (!user) {
+      throw new Error("Usuário não encontrado");
+    }
+
+    // REGRAS DE PERMISSÃO:
+    // Professores podem ver qualquer usuário
+    if (authenticatedUser.role === "professor") {
+      return user;
+    }
+    
+    // Alunos só podem ver outros alunos
+    if (authenticatedUser.role === "aluno") {
+      if (user.role !== "aluno") {
+        throw new Error("Você não tem permissão para visualizar este usuário");
+      }
+      return user;
+    }
+    
+    throw new Error("Role do usuário não especificado ou inválido");
+  } catch (error) {
+    console.error("Erro no service ao buscar usuário:", error);
+    throw error;
+  }
+};
+
 export const deleteUser = (id) => repository.deleteUser(id);
