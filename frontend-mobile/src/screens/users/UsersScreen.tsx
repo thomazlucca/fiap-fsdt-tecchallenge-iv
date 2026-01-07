@@ -105,53 +105,57 @@ const UsersScreen = () => {
 
   // Verificar se pode excluir usuário
   const canDeleteUser = (userId: string, userRole: string): boolean => {
-    if (!currentUser) return false;
-    
-    // Não pode excluir a si mesmo
-    if (userId === currentUser._id) return false;
-    
-    // Professor pode excluir qualquer um
-    if (isProfessor) return true;
-    
-    // Aluno não pode excluir ninguém
-    return false;
-  };
+  if (!currentUser) return false;
+  
+  // Não pode excluir a si mesmo
+  if (userId === currentUser._id) return false;
+  
+  // Professor pode excluir qualquer um
+  if (isProfessor) return true;
+  
+  // Aluno só pode excluir outros alunos
+  if (currentUser.role === "aluno" && userRole === "aluno") {
+    return true;
+  }
+  
+  return false;
+};
 
   // Excluir usuário
   const handleDeleteUser = useCallback(
-    async (userId: string, userName: string) => {
-      if (!canDeleteUser(userId, "")) {
-        Alert.alert(
-          "Ação não permitida",
-          "Você não tem permissão para excluir este usuário"
-        );
-        return;
-      }
-
+  async (userId: string, userName: string, userRole: string) => {
+    if (!canDeleteUser(userId, userRole)) {
       Alert.alert(
-        "Excluir Usuário",
-        `Tem certeza que deseja excluir ${userName}?`,
-        [
-          { text: "Cancelar", style: "cancel" },
-          {
-            text: "Excluir",
-            style: "destructive",
-            onPress: async () => {
-              try {
-                await userApi.delete(userId);
-                Alert.alert("Sucesso", "Usuário excluído com sucesso!");
-                fetchUsers(); // Recarregar lista
-              } catch (err: any) {
-                Alert.alert("Erro", "Não foi possível excluir o usuário");
-                console.error("Erro ao excluir usuário:", err);
-              }
-            },
-          },
-        ]
+        "Ação não permitida",
+        "Você não tem permissão para excluir este usuário"
       );
-    },
-    [currentUser, fetchUsers]
-  );
+      return;
+    }
+
+    Alert.alert(
+      "Excluir Usuário",
+      `Tem certeza que deseja excluir ${userName}?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await userApi.delete(userId);
+              Alert.alert("Sucesso", "Usuário excluído com sucesso!");
+              fetchUsers(); // Recarregar lista
+            } catch (err: any) {
+              Alert.alert("Erro", "Não foi possível excluir o usuário");
+              console.error("Erro ao excluir usuário:", err);
+            }
+          },
+        },
+      ]
+    );
+  },
+  [currentUser, fetchUsers]
+);
 
   // Filtrar usuários
   const filteredUsers = users.filter((user) => {
@@ -238,7 +242,7 @@ const UsersScreen = () => {
         {showDeleteButton && (
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => handleDeleteUser(item._id, item.nome)}
+            onPress={() => handleDeleteUser(item._id, item.nome, item.role)}
           >
             <Ionicons name="trash-outline" size={20} color="#e74c3c" />
           </TouchableOpacity>
@@ -377,7 +381,7 @@ const UsersScreen = () => {
       />
       
       {/* Botão flutuante para criar usuário (apenas professores) */}
-      {isProfessor && (
+      {currentUser && (
         <TouchableOpacity style={styles.fab} onPress={handleCreateUser}>
           <Ionicons name="person-add" size={24} color="#fff" />
         </TouchableOpacity>

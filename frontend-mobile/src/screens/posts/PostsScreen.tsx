@@ -1,3 +1,4 @@
+// src/screens/posts/PostsScreen.tsx
 import React, { useState, useCallback, useRef } from "react";
 import {
   View,
@@ -18,9 +19,12 @@ import { useNavigation } from "@react-navigation/native";
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
-import SearchInput from "../../components/common/SearchInput"; // Se tiver
+import SearchInput from "../../components/common/SearchInput";
 
-type PostsScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Posts'>;
+type PostsScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Posts"
+>;
 
 const PostsScreen = () => {
   const navigation = useNavigation<PostsScreenNavigationProp>();
@@ -28,6 +32,21 @@ const PostsScreen = () => {
   const { posts, loading, error, fetchPosts, deletePost } = usePosts();
 
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const searchInputRef = useRef<TextInput>(null);
+
+  // Filtrar posts com base na busca
+  const filteredPosts = posts.filter((post) => {
+    if (!searchQuery.trim()) return true;
+
+    const query = searchQuery.toLowerCase();
+    return (
+      post.titulo.toLowerCase().includes(query) ||
+      post.conteudo.toLowerCase().includes(query) ||
+      (post.autor?.nome && post.autor.nome.toLowerCase().includes(query))
+    );
+  });
 
   useFocusEffect(
     useCallback(() => {
@@ -39,6 +58,23 @@ const PostsScreen = () => {
     setRefreshing(true);
     await fetchPosts();
     setRefreshing(false);
+  };
+
+  const handleSearch = (query: string): void => {
+    setSearchQuery(query);
+    if (query.length > 0) {
+      setIsSearching(true);
+    } else {
+      setIsSearching(false);
+    }
+  };
+
+  const handleClearSearch = (): void => {
+    setSearchQuery("");
+    setIsSearching(false);
+    if (searchInputRef.current) {
+      searchInputRef.current.blur();
+    }
   };
 
   const handlePostPress = (postId: string): void => {
@@ -121,17 +157,72 @@ const PostsScreen = () => {
     </View>
   );
 
+  const renderSearchBar = () => (
+    <View style={styles.searchContainer}>
+      <SearchInput
+        ref={searchInputRef}
+        onSearch={handleSearch}
+        placeholder="Buscar posts por título, conteúdo ou autor..."
+        isLoading={false}
+      />
+      {isSearching && (
+        <TouchableOpacity
+          onPress={handleClearSearch}
+          style={styles.clearSearchButton}
+        >
+          <Ionicons name="close" size={20} color="#7f8c8d" />
+          <Text style={styles.clearSearchText}>Limpar</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Ionicons name="document-text-outline" size={64} color="#bdc3c7" />
-      <Text style={styles.emptyStateTitle}>Nenhum post</Text>
+      <Ionicons
+        name={isSearching ? "search-outline" : "document-text-outline"}
+        size={64}
+        color="#bdc3c7"
+      />
+      <Text style={styles.emptyStateTitle}>
+        {isSearching ? "Nenhum post encontrado" : "Nenhum post"}
+      </Text>
       <Text style={styles.emptyStateText}>
-        {isAuthenticated && user?.role === "professor"
+        {isSearching
+          ? "Tente buscar com outras palavras"
+          : isAuthenticated && user?.role === "professor"
           ? "Crie o primeiro post!"
           : "Aguarde os professores criarem posts."}
       </Text>
+      {isSearching && (
+        <TouchableOpacity
+          onPress={handleClearSearch}
+          style={styles.tryAgainButton}
+        >
+          <Text style={styles.tryAgainText}>Limpar busca</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
+
+  const renderStats = () => {
+    if (posts.length === 0) return null;
+
+    return (
+      <View style={styles.statsContainer}>
+        <Text style={styles.statsText}>
+          {isSearching
+            ? `Mostrando ${filteredPosts.length} de ${posts.length} posts`
+            : `${posts.length} ${
+                posts.length === 1 ? "post" : "posts"
+              } disponíveis`}
+        </Text>
+        {isSearching && searchQuery.length > 0 && (
+          <Text style={styles.searchQueryText}>Buscando: "{searchQuery}"</Text>
+        )}
+      </View>
+    );
+  };
 
   if (loading && !refreshing && posts.length === 0) {
     return (
@@ -148,7 +239,7 @@ const PostsScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
-        data={posts}
+        data={filteredPosts}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <PostItem
@@ -165,9 +256,16 @@ const PostsScreen = () => {
                 : undefined
             }
             showActions={isAuthenticated && user?.role === "professor"}
+            highlightText={searchQuery} // Destacar texto buscado
           />
         )}
-        ListHeaderComponent={renderHeader()}
+        ListHeaderComponent={
+          <>
+            {renderHeader()}
+            {renderSearchBar()}
+            {renderStats()}
+          </>
+        }
         ListEmptyComponent={renderEmptyState()}
         contentContainerStyle={styles.listContent}
         refreshControl={
@@ -178,6 +276,7 @@ const PostsScreen = () => {
             tintColor="#3498db"
           />
         }
+        stickyHeaderIndices={[0]} // Fixa o header no topo
       />
 
       {/* Botão flutuante para criar post (apenas professores logados) */}
@@ -211,7 +310,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 20,
+    paddingBottom: 15,
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
@@ -243,6 +342,47 @@ const styles = StyleSheet.create({
   },
   authButton: {
     padding: 8,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    gap: 10,
+  },
+  clearSearchButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#f8f9fa",
+    borderRadius: 6,
+    gap: 4,
+  },
+  clearSearchText: {
+    fontSize: 14,
+    color: "#7f8c8d",
+  },
+  statsContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 10,
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+  },
+  statsText: {
+    fontSize: 14,
+    color: "#7f8c8d",
+  },
+  searchQueryText: {
+    fontSize: 12,
+    color: "#3498db",
+    fontStyle: "italic",
+    marginTop: 4,
   },
   listContent: {
     paddingBottom: 100,
@@ -279,6 +419,18 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
     textAlign: "center",
     marginBottom: 16,
+  },
+  tryAgainButton: {
+    marginTop: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#3498db",
+    borderRadius: 8,
+  },
+  tryAgainText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
   fab: {
     position: "absolute",

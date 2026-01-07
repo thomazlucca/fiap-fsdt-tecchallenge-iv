@@ -110,14 +110,14 @@ const AppNavigator: React.FC = () => {
               component={CreateEditPostScreen}
               options={{ title: "Editar Post" }}
             />
-
-            <Stack.Screen
-              name="CreateUser"
-              component={CreateUserScreen}
-              options={{ title: "Criar Usuário" }}
-            />
           </>
         )}
+        
+        <Stack.Screen
+          name="CreateUser"
+          component={CreateUserScreen}
+          options={{ title: "Criar Usuário" }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

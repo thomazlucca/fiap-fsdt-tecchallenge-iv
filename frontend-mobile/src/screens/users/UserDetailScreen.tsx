@@ -1,4 +1,4 @@
-// src/screens/users/UserDetailScreen.tsx
+// src/screens/users/UserDetailScreen.tsx - VERSÃO COMPLETA ATUALIZADA
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -42,12 +42,14 @@ const UserDetailScreen = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [updating, setUpdating] = useState<boolean>(false);
 
-  // Form fields
+  // Form fields - ADICIONE CAMPOS DE SENHA
   const [editData, setEditData] = useState<UpdateUserDto>({
     nome: "",
     email: "",
     role: "aluno",
   });
+  const [novaSenha, setNovaSenha] = useState<string>("");
+  const [confirmarSenha, setConfirmarSenha] = useState<string>("");
 
   // Buscar dados do usuário
   const fetchUserDetails = useCallback(async () => {
@@ -60,6 +62,9 @@ const UserDetailScreen = () => {
         email: data.email,
         role: data.role,
       });
+      // Limpar campos de senha
+      setNovaSenha("");
+      setConfirmarSenha("");
     } catch (err: any) {
       Alert.alert("Erro", "Não foi possível carregar os dados do usuário");
       console.error("Erro ao buscar usuário:", err);
@@ -85,7 +90,29 @@ const UserDetailScreen = () => {
     // Professor pode editar qualquer um
     if (currentUser.role === "professor") return true;
 
-    // Aluno só pode editar se for ele mesmo (já verificado acima)
+    // Aluno só pode editar outros alunos
+    if (currentUser.role === "aluno" && user.role === "aluno") {
+      return true;
+    }
+
+    return false;
+  };
+
+  // Verificar se pode alterar senha
+  const canChangePassword = (): boolean => {
+    if (!currentUser || !user) return false;
+    
+    // Se for o próprio usuário, pode alterar senha
+    if (currentUser._id === user._id) return true;
+    
+    // Professor pode alterar senha de qualquer um
+    if (currentUser.role === "professor") return true;
+    
+    // Aluno só pode alterar senha de outros alunos
+    if (currentUser.role === "aluno" && user.role === "aluno") {
+      return true;
+    }
+    
     return false;
   };
 
@@ -101,11 +128,29 @@ const UserDetailScreen = () => {
     return false;
   };
 
+  // Verificar se pode excluir
+  const canDeleteUser = (): boolean => {
+    if (!currentUser || !user) return false;
+    
+    // Não pode excluir a si mesmo
+    if (currentUser._id === user._id) return false;
+    
+    // Professor pode excluir qualquer um
+    if (currentUser.role === "professor") return true;
+    
+    // Aluno só pode excluir outros alunos
+    if (currentUser.role === "aluno" && user.role === "aluno") {
+      return true;
+    }
+    
+    return false;
+  };
+
   // Handle update
   const handleUpdateUser = async () => {
     if (!user) return;
 
-    // Validações
+    // Validações básicas
     if (!editData.nome?.trim()) {
       Alert.alert("Erro", "O nome é obrigatório");
       return;
@@ -116,11 +161,42 @@ const UserDetailScreen = () => {
       return;
     }
 
-    // Verificar se houve alterações
+    // Validação de senha se for preenchida
+    if (novaSenha || confirmarSenha) {
+      if (!canChangePassword()) {
+        Alert.alert("Erro", "Você não tem permissão para alterar a senha deste usuário");
+        return;
+      }
+
+      if (novaSenha.length < 6) {
+        Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres");
+        return;
+      }
+
+      if (novaSenha !== confirmarSenha) {
+        Alert.alert("Erro", "As senhas não coincidem");
+        return;
+      }
+    }
+
+    // Preparar dados para envio
+    const dadosParaEnviar: UpdateUserDto = {
+      nome: editData.nome !== user.nome ? editData.nome : undefined,
+      email: editData.email !== user.email ? editData.email : undefined,
+      role: editData.role !== user.role ? editData.role : undefined,
+    };
+
+    // Adicionar senha se foi preenchida
+    if (novaSenha && novaSenha.length >= 6) {
+      dadosParaEnviar.senha = novaSenha;
+    }
+
+    // Verificar se há alterações
     const hasChanges = 
-      editData.nome !== user.nome ||
-      editData.email !== user.email ||
-      (editData.role && editData.role !== user.role);
+      dadosParaEnviar.nome !== undefined ||
+      dadosParaEnviar.email !== undefined ||
+      dadosParaEnviar.role !== undefined ||
+      dadosParaEnviar.senha !== undefined;
 
     if (!hasChanges) {
       Alert.alert("Aviso", "Nenhuma alteração foi feita");
@@ -129,14 +205,29 @@ const UserDetailScreen = () => {
 
     try {
       setUpdating(true);
-      await userApi.update(userId, editData);
+      await userApi.update(userId, dadosParaEnviar);
       
       Alert.alert("Sucesso", "Usuário atualizado com sucesso!");
       fetchUserDetails(); // Recarregar dados
       setEditModalVisible(false);
+      
+      // Limpar campos de senha
+      setNovaSenha("");
+      setConfirmarSenha("");
     } catch (err: any) {
-      Alert.alert("Erro", "Não foi possível atualizar o usuário");
       console.error("Erro ao atualizar usuário:", err);
+      
+      let errorMessage = "Não foi possível atualizar o usuário";
+      
+      if (err.response?.status === 401) {
+        errorMessage = "Sessão expirada. Faça login novamente.";
+      } else if (err.response?.status === 403) {
+        errorMessage = "Você não tem permissão para editar este usuário";
+      } else if (err.response?.data?.message?.includes("email")) {
+        errorMessage = "Este email já está em uso";
+      }
+      
+      Alert.alert("Erro", errorMessage);
     } finally {
       setUpdating(false);
     }
@@ -146,11 +237,10 @@ const UserDetailScreen = () => {
   const handleDeleteUser = () => {
     if (!user) return;
 
-    // Não permitir excluir a si mesmo
-    if (user._id === currentUser?._id) {
+    if (!canDeleteUser()) {
       Alert.alert(
         "Ação não permitida",
-        "Você não pode excluir sua própria conta"
+        "Você não tem permissão para excluir este usuário"
       );
       return;
     }
@@ -218,6 +308,8 @@ const UserDetailScreen = () => {
   const isCurrentUser = currentUser?._id === user._id;
   const canEdit = canEditUser();
   const canChangeRolePermission = canChangeRole();
+  const canChangePasswordPermission = canChangePassword();
+  const canDelete = canDeleteUser();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -270,6 +362,18 @@ const UserDetailScreen = () => {
             <View style={styles.currentUserBadge}>
               <Ionicons name="person" size={16} color="#fff" />
               <Text style={styles.currentUserText}>Você</Text>
+            </View>
+          )}
+          
+          {/* Badge de permissões */}
+          {!isCurrentUser && (
+            <View style={styles.permissionBadge}>
+              <Ionicons name="shield-outline" size={14} color="#fff" />
+              <Text style={styles.permissionBadgeText}>
+                {currentUser?.role === "professor" 
+                  ? "Você tem todas as permissões" 
+                  : "Permissões limitadas"}
+              </Text>
             </View>
           )}
         </View>
@@ -341,14 +445,15 @@ const UserDetailScreen = () => {
                   {isCurrentUser 
                     ? "Editar seus dados pessoais" 
                     : `Editar dados de ${user.nome}`}
+                  {canChangePasswordPermission && " • Pode alterar senha"}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#95a5a6" />
             </TouchableOpacity>
           )}
 
-          {/* Botão de excluir (não mostrar para si mesmo) */}
-          {!isCurrentUser && currentUser?.role === "professor" && (
+          {/* Botão de excluir */}
+          {canDelete && (
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteActionButton]}
               onPress={handleDeleteUser}
@@ -375,7 +480,11 @@ const UserDetailScreen = () => {
         animationType="slide"
         transparent={true}
         visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
+        onRequestClose={() => {
+          setEditModalVisible(false);
+          setNovaSenha("");
+          setConfirmarSenha("");
+        }}
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -383,8 +492,14 @@ const UserDetailScreen = () => {
         >
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Editar Usuário</Text>
-              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+              <Text style={styles.modalTitle}>
+                {isCurrentUser ? "Editar Meu Perfil" : "Editar Usuário"}
+              </Text>
+              <TouchableOpacity onPress={() => {
+                setEditModalVisible(false);
+                setNovaSenha("");
+                setConfirmarSenha("");
+              }}>
                 <Ionicons name="close" size={24} color="#2c3e50" />
               </TouchableOpacity>
             </View>
@@ -407,6 +522,38 @@ const UserDetailScreen = () => {
                 autoCapitalize="none"
                 required
               />
+
+              {/* Campos de senha (apenas se tiver permissão) */}
+              {canChangePasswordPermission && (
+                <>
+                  <View style={styles.sectionDivider}>
+                    <Text style={styles.sectionDividerText}>Alterar Senha (Opcional)</Text>
+                  </View>
+                  
+                  <Input
+                    label="Nova Senha"
+                    value={novaSenha}
+                    onChangeText={setNovaSenha}
+                    placeholder="Deixe em branco para não alterar"
+                    secureTextEntry
+                  />
+                  
+                  <Input
+                    label="Confirmar Nova Senha"
+                    value={confirmarSenha}
+                    onChangeText={setConfirmarSenha}
+                    placeholder="Repita a nova senha"
+                    secureTextEntry
+                  />
+                  
+                  <View style={styles.passwordInfo}>
+                    <Ionicons name="information-circle-outline" size={16} color="#3498db" />
+                    <Text style={styles.passwordInfoText}>
+                      Preencha apenas se deseja alterar a senha. Mínimo 6 caracteres.
+                    </Text>
+                  </View>
+                </>
+              )}
 
               {/* Seletor de Role (apenas para professores editando outros) */}
               {canChangeRolePermission && (
@@ -446,7 +593,11 @@ const UserDetailScreen = () => {
               <View style={styles.modalButtons}>
                 <Button
                   title="Cancelar"
-                  onPress={() => setEditModalVisible(false)}
+                  onPress={() => {
+                    setEditModalVisible(false);
+                    setNovaSenha("");
+                    setConfirmarSenha("");
+                  }}
                   variant="outline"
                   style={styles.cancelButton}
                 />
@@ -544,7 +695,7 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 16,
     color: "#7f8c8d",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   currentUserBadge: {
     flexDirection: "row",
@@ -553,8 +704,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    marginBottom: 8,
   },
   currentUserText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 4,
+  },
+  permissionBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#9b59b6",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  permissionBadgeText: {
     color: "#fff",
     fontSize: 12,
     fontWeight: "600",
@@ -641,7 +807,7 @@ const styles = StyleSheet.create({
     color: "#e74c3c",
   },
   actionDescription: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#7f8c8d",
   },
   loadingContainer: {
@@ -698,6 +864,33 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#2c3e50",
     marginBottom: 8,
+  },
+  sectionDivider: {
+    borderTopWidth: 1,
+    borderTopColor: "#e0e0e0",
+    marginTop: 20,
+    paddingTop: 20,
+    marginBottom: 15,
+  },
+  sectionDividerText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2c3e50",
+    marginBottom: 10,
+  },
+  passwordInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e3f2fd",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    gap: 8,
+  },
+  passwordInfoText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#1976d2",
   },
   roleSelector: {
     marginTop: 20,
