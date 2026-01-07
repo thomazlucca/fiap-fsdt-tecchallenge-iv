@@ -71,7 +71,7 @@ GET /posts/:id -Detalha um post específico
 
 ⚙️ Como Executar o Projeto (Frontend)
 
-O projeto foi desenvolvido utilizando o Android Studio, criando um dispositivo virtual modelo Pixel 6, rodando android 13.0("Tiramisu").
+O projeto foi desenvolvido utilizando o Android Studio, criando um dispositivo virtual.
 
 1️⃣ Com o backend rodando, abra outro terminal e navegue até a pasta:
 
@@ -98,3 +98,9 @@ npx expo start
 Após carregar, pressione "a" para abrir no dispositivo android
 
 O emulador deve então carregar a aplicação.
+
+Para executar o projeto no celular, é necessário alterar o IP no arquivo
+
+```
+src/utils/apiConfig.ts
+```

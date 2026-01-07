@@ -84,7 +84,6 @@ const CreateUserScreen = () => {
 
       // DEBUG: Verificar token
       const token = await AsyncStorage.getItem("@auth_token");
-      console.log("🔑 Token atual:", token ? "Presente" : "Ausente");
 
       if (!token) {
         Alert.alert("Erro", "Você precisa estar logado para criar usuários");
@@ -92,18 +91,14 @@ const CreateUserScreen = () => {
         return;
       }
 
-      console.log("📤 Dados sendo enviados para a API:", formData);
-
       // Se for aluno tentando criar professor, força como aluno
       const userDataToSend = {
         ...formData,
         role: canCreateProfessor() ? formData.role : "aluno",
       };
 
-      console.log("📤 Dados ajustados:", userDataToSend);
 
       const response = await userApi.create(userDataToSend);
-      console.log("✅ Resposta da API:", response);
 
       Alert.alert("Sucesso!", `Usuário ${formData.nome} criado com sucesso!`, [
         {
@@ -157,14 +152,6 @@ const CreateUserScreen = () => {
           <Ionicons name="arrow-back" size={24} color="#3498db" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>👤 Criar Novo Usuário</Text>
-        <View style={styles.headerActions}>
-          {canCreateProfessor() && (
-            <View style={styles.userTypeBadge}>
-              <Ionicons name="school-outline" size={16} color="#fff" />
-              <Text style={styles.userTypeText}>Professor</Text>
-            </View>
-          )}
-        </View>
       </View>
 
       <KeyboardAvoidingView

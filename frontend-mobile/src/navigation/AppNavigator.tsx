@@ -52,7 +52,7 @@ const AppNavigator: React.FC = () => {
           headerTitleStyle: { fontWeight: "bold" },
         }}
       >
-        {/* 🌍 TELAS PÚBLICAS */}
+        {/* TELAS PÚBLICAS */}
         <Stack.Screen
           name="Posts"
           component={PostsScreen}
@@ -71,19 +71,13 @@ const AppNavigator: React.FC = () => {
           options={{ title: "Login" }}
         />
 
-        <Stack.Screen
+        {/* <Stack.Screen
           name="Register"
           component={RegisterScreen}
           options={{ title: "Criar Conta" }}
-        />
+        /> */}
 
-        <Stack.Screen
-          name="TestConnection"
-          component={TestConnectionScreen}
-          options={{ title: "Teste de Conexão" }}
-        />
-
-        {/* 🔐 TELA USERS - disponível para todos logados */}
+        {/* TELA USERS - disponível para todos logados */}
         <Stack.Screen
           name="Users"
           component={UsersScreen}

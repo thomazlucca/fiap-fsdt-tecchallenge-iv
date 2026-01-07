@@ -91,7 +91,7 @@ const UsersScreen = () => {
       // Mostrar informações básicas sem opção de editar
       Alert.alert(
         user.nome,
-        `Email: ${user.email}\nTipo: ${user.role === "professor" ? "Professor 👨‍🏫" : "Aluno 👨‍🎓"}\n\nApenas professores podem editar outros professores.`,
+        `Email: ${user.email}\nTipo: ${user.role === "professor" ? "Professor" : "Aluno"}\n\nApenas professores podem editar outros professores.`,
         [{ text: "OK" }]
       );
     }
@@ -230,7 +230,7 @@ const UsersScreen = () => {
                 { color: item.role === "professor" ? "#e74c3c" : "#3498db" },
               ]}
             >
-              {item.role === "professor" ? "👨‍🏫 Professor" : "👨‍🎓 Aluno"}
+              {item.role === "professor" ? "Professor" : "Aluno"}
             </Text>
             <Text style={styles.userDate}>
               Criado: {new Date(item.createdAt).toLocaleDateString("pt-BR")}

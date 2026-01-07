@@ -125,8 +125,6 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
         // NÃO enviar 'autor' aqui
       };
 
-      console.log("📤 Salvando post:", { isEditing, postId, postData });
-
       if (isEditing && postId) {
         const response = await postApi.update(postId, postData);
         console.log("✅ Post atualizado:", response);

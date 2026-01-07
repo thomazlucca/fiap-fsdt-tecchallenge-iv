@@ -83,7 +83,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>FIAP Tech Challenge</Text>
+            <Text style={styles.title}>Blog de Postagens</Text>
             <Text style={styles.subtitle}>Faça login para continuar</Text>
           </View>
 
@@ -116,7 +116,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               style={styles.loginButton}
             />
 
-            <View style={styles.divider}>
+            {/* <View style={styles.divider}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>OU</Text>
               <View style={styles.dividerLine} />
@@ -127,7 +127,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               onPress={handleRegister}
               type="outline"
               disabled={loading}
-            />
+            /> */}
 
             <View style={styles.helpText}>
               <Text style={styles.helpTextContent}>

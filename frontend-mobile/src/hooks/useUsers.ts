@@ -2,8 +2,6 @@ import { useState, useCallback } from "react";
 import { userApi } from "../api";
 import { User } from "../api/types/user.types";
 
-console.log("🚨 userApi importado:", userApi);
-
 export const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);

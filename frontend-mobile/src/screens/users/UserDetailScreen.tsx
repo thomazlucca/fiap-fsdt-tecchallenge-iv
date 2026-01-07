@@ -403,7 +403,7 @@ const UserDetailScreen = () => {
             <View style={styles.detailContent}>
               <Text style={styles.detailLabel}>Tipo de Usuário</Text>
               <Text style={styles.detailValue}>
-                {user.role === "professor" ? "Professor 👨‍🏫" : "Aluno 👨‍🎓"}
+                {user.role === "professor" ? "Professor" : "Aluno"}
               </Text>
             </View>
           </View>

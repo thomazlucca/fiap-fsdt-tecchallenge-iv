@@ -129,8 +129,6 @@ const PostsScreen = () => {
         <Text style={styles.title}>📝 Posts Acadêmicos</Text>
         <Text style={styles.subtitle}>
           {isAuthenticated ? `Olá, ${user?.nome}!` : "Visitante"}
-          {user?.role === "professor" && " 👨‍🏫"}
-          {user?.role === "aluno" && " 👨‍🎓"}
         </Text>
       </View>
 
