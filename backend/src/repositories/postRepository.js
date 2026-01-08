@@ -11,7 +11,6 @@ export const editPost = (id, data) =>
   );
 
 export const searchPosts = async (query) => {
-  // Primeiro busca usuários com nome parecido
   const User = mongoose.model("User");
   const users = await User.find({
     nome: { $regex: query, $options: "i" },
@@ -19,12 +18,11 @@ export const searchPosts = async (query) => {
 
   const userIds = users.map((user) => user._id);
 
-  // Depois busca posts desses usuários OU com título/conteúdo
   return Post.find({
     $or: [
       { titulo: { $regex: query, $options: "i" } },
       { conteudo: { $regex: query, $options: "i" } },
-      { autor: { $in: userIds } }, // Posts dos usuários encontrados
+      { autor: { $in: userIds } },
     ],
   })
     .populate("autor", "nome")

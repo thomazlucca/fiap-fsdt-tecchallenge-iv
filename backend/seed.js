@@ -8,7 +8,6 @@ async function run() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
 
-    //Garante professor
     let professor = await User.findOne({ email: "prof@email.com" });
 
     if (!professor) {
@@ -33,10 +32,8 @@ async function run() {
       console.log("Aluno criado");
     }
 
-    //Limpa posts antigos (opcional)
     await Post.deleteMany({ autor: professor._id });
 
-    //Cria posts
     const posts = await Post.insertMany([
       {
         titulo: "Introdução ao Node.js",
@@ -63,13 +60,13 @@ async function run() {
         conteudo: "Conteúdo inicial sobre Docker...",
         autor: professor._id,
       },
-      
+
       {
         titulo: "Introdução ao Linux",
         conteudo: "Conteúdo inicial sobre Linux...",
         autor: professor._id,
       },
-      
+
       {
         titulo: "Introdução ao Javascript",
         conteudo: "Conteúdo inicial sobre Javascript...",

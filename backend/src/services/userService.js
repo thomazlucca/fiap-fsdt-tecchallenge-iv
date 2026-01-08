@@ -24,11 +24,11 @@ export const listUsers = (authenticatedUserRole) => {
   if (authenticatedUserRole === "professor") {
     return repository.listAllUsers();
   }
-  
+
   if (authenticatedUserRole === "aluno") {
     return repository.listAlunos();
   }
-  
+
   throw new Error("Role do usuário não especificado ou inválido");
 };
 
@@ -41,24 +41,16 @@ export const updateUser = async (id, data, authenticatedUser) => {
       throw new Error("Usuário não encontrado");
     }
 
-    // REGRAS PARA ALUNOS:
     if (authenticatedUser.role === "aluno") {
-      // Alunos só podem editar outros alunos (não podem editar professores)
       if (userToUpdate.role !== "aluno") {
         throw new Error("Alunos só podem editar outros alunos");
       }
-      
-      // Alunos NÃO podem alterar o role de ninguém
+
       if (data.role) {
         throw new Error("Alunos não podem alterar o tipo de usuário");
       }
     }
 
-    // REGRAS PARA PROFESSORES:
-    // Professores podem editar qualquer usuário (alunos e professores)
-    // e podem alterar o role
-
-    // Verifica se email já existe
     if (data.email && data.email !== userToUpdate.email) {
       const existingUser = await repository.findByEmail(data.email);
       if (existingUser && existingUser._id.toString() !== id) {
@@ -66,15 +58,13 @@ export const updateUser = async (id, data, authenticatedUser) => {
       }
     }
 
-    // Criptografa senha se fornecida
     if (data.senha) {
       const salt = await bcrypt.genSalt(10);
       data.senha = await bcrypt.hash(data.senha, salt);
     }
 
-    // Atualiza usuário
     const updatedUser = await repository.updateUser(id, data);
-    
+
     return updatedUser;
   } catch (error) {
     console.error("Erro no service ao atualizar usuário:", error);
@@ -89,20 +79,17 @@ export const getUserById = async (id, authenticatedUser) => {
       throw new Error("Usuário não encontrado");
     }
 
-    // REGRAS DE PERMISSÃO:
-    // Professores podem ver qualquer usuário
     if (authenticatedUser.role === "professor") {
       return user;
     }
-    
-    // Alunos só podem ver outros alunos
+
     if (authenticatedUser.role === "aluno") {
       if (user.role !== "aluno") {
         throw new Error("Você não tem permissão para visualizar este usuário");
       }
       return user;
     }
-    
+
     throw new Error("Role do usuário não especificado ou inválido");
   } catch (error) {
     console.error("Erro no service ao buscar usuário:", error);
