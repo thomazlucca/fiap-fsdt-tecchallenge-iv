@@ -1,4 +1,3 @@
-// src/screens/users/CreateUserScreen.tsx
 import React, { useState } from "react";
 import {
   View,
@@ -32,23 +31,20 @@ const CreateUserScreen = () => {
   const navigation = useNavigation<CreateUserScreenNavigationProp>();
   const { user: currentUser } = useAuth();
 
-  // Estado do formulário
   const [formData, setFormData] = useState<CreateUserDto>({
     nome: "",
     email: "",
     senha: "",
-    role: "aluno", // Default é aluno
+    role: "aluno",
   });
 
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Verificar permissões para criar tipo de usuário
   const canCreateProfessor = (): boolean => {
     return currentUser?.role === "professor";
   };
 
-  // Validar formulário
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -72,7 +68,6 @@ const CreateUserScreen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle create user
   const handleCreateUser = async () => {
     if (!validateForm()) {
       Alert.alert("Erro", "Por favor, corrija os erros no formulário");
@@ -82,7 +77,6 @@ const CreateUserScreen = () => {
     try {
       setLoading(true);
 
-      // DEBUG: Verificar token
       const token = await AsyncStorage.getItem("@auth_token");
 
       if (!token) {
@@ -91,7 +85,6 @@ const CreateUserScreen = () => {
         return;
       }
 
-      // Se for aluno tentando criar professor, força como aluno
       const userDataToSend = {
         ...formData,
         role: canCreateProfessor() ? formData.role : "aluno",
@@ -111,7 +104,6 @@ const CreateUserScreen = () => {
 
       let errorMessage = "Não foi possível criar o usuário";
 
-      // Tratar erros específicos da API
       if (err.response?.data?.message?.includes("email")) {
         errorMessage = "Este email já está em uso";
       } else if (err.response?.status === 400) {
@@ -124,7 +116,6 @@ const CreateUserScreen = () => {
     }
   };
 
-  // Handle go back
   const handleGoBack = () => {
     if (formData.nome || formData.email || formData.senha) {
       Alert.alert(
@@ -146,7 +137,6 @@ const CreateUserScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#3498db" />
@@ -163,7 +153,6 @@ const CreateUserScreen = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Card de Informações */}
           <View style={styles.infoCard}>
             <Ionicons
               name="information-circle-outline"
@@ -177,7 +166,6 @@ const CreateUserScreen = () => {
             </Text>
           </View>
 
-          {/* Formulário */}
           <View style={styles.formCard}>
             <Text style={styles.sectionTitle}>Informações do Usuário</Text>
 
@@ -191,7 +179,6 @@ const CreateUserScreen = () => {
               placeholder="Digite o nome completo"
               error={errors.nome}
               autoCapitalize="words"
-              required
             />
 
             <Input
@@ -205,7 +192,6 @@ const CreateUserScreen = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               error={errors.email}
-              required
             />
 
             <Input
@@ -218,10 +204,8 @@ const CreateUserScreen = () => {
               placeholder="Mínimo 6 caracteres"
               secureTextEntry
               error={errors.senha}
-              required
             />
 
-            {/* Seletor de Tipo de Usuário (apenas para professores) */}
             {canCreateProfessor() && (
               <View style={styles.roleSelector}>
                 <Text style={styles.selectorLabel}>Tipo de Usuário *</Text>
@@ -233,11 +217,11 @@ const CreateUserScreen = () => {
                         styles.roleButton,
                         formData.role === role && styles.roleButtonActive,
                         role === "professor" &&
-                          formData.role === "professor" &&
-                          styles.roleButtonProfessorActive,
+                        formData.role === "professor" &&
+                        styles.roleButtonProfessorActive,
                         role === "aluno" &&
-                          formData.role === "aluno" &&
-                          styles.roleButtonAlunoActive,
+                        formData.role === "aluno" &&
+                        styles.roleButtonAlunoActive,
                       ]}
                       onPress={() => setFormData({ ...formData, role })}
                     >
@@ -269,7 +253,6 @@ const CreateUserScreen = () => {
               </View>
             )}
 
-            {/* Aviso para alunos criando usuários */}
             {!canCreateProfessor() && (
               <View style={styles.warningCard}>
                 <Ionicons
@@ -283,12 +266,10 @@ const CreateUserScreen = () => {
               </View>
             )}
 
-            {/* Botões */}
             <View style={styles.buttonContainer}>
               <Button
                 title="Cancelar"
                 onPress={handleGoBack}
-                variant="outline"
                 style={styles.cancelButton}
                 disabled={loading}
               />
@@ -300,7 +281,6 @@ const CreateUserScreen = () => {
               />
             </View>
 
-            {/* Dicas */}
             <View style={styles.tipsContainer}>
               <Text style={styles.tipsTitle}>📝 Dicas:</Text>
               <View style={styles.tipItem}>
@@ -356,7 +336,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   headerActions: {
-    width: 40, // Para manter alinhamento
+    width: 40,
   },
   userTypeBadge: {
     flexDirection: "row",

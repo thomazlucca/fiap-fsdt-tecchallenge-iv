@@ -75,7 +75,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
 
   const handleChange = (field: string, value: string): void => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpa erro do campo quando o usuário começa a digitar
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -215,7 +214,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
                     style={[
                       styles.roleButtonText,
                       formData.role === "professor" &&
-                        styles.roleButtonTextActive,
+                      styles.roleButtonTextActive,
                     ]}
                   >
                     Professor
@@ -277,7 +276,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   backButtonPlaceholder: {
-    width: 40, // Para manter o título centralizado
+    width: 40,
   },
   title: {
     fontSize: 28,

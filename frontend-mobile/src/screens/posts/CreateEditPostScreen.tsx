@@ -19,7 +19,6 @@ import { postApi } from "../../api/postApi";
 import Input from "../../components/common/Input";
 import Button from "../../components/common/Button";
 
-// Using RootStackParamList from navigation/AppNavigator.tsx
 
 type CreateEditPostScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -41,7 +40,6 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
 }) => {
   const { user } = useAuth();
 
-  // Verificar se estamos editando
   const isEditing = route.params && "postId" in route.params;
   const postId = isEditing && route.params ? route.params.postId : null;
 
@@ -61,7 +59,6 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
       loadPost();
     }
 
-    // Definir título da tela
     navigation.setOptions({
       title: isEditing ? "Editar Post" : "Criar Novo Post",
     });
@@ -106,7 +103,6 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
 
   const handleChange = (field: keyof typeof formData, value: string): void => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Limpa erro do campo quando o usuário começa a digitar
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -118,11 +114,9 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
     try {
       setSaving(true);
 
-      // IMPORTANTE: Não enviar campo 'autor' - backend pega do token
       const postData = {
         titulo: formData.titulo,
         conteudo: formData.conteudo,
-        // NÃO enviar 'autor' aqui
       };
 
       if (isEditing && postId) {
@@ -133,7 +127,6 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
           {
             text: "OK",
             onPress: () => {
-              // Navegar de volta com flag de refresh
               navigation.navigate("Posts", {
                 refresh: true,
                 updatedPostId: postId,
@@ -149,7 +142,6 @@ const CreateEditPostScreen: React.FC<CreateEditPostScreenProps> = ({
           {
             text: "OK",
             onPress: () => {
-              // Navegar para posts com flag de refresh
               navigation.navigate("Posts", {
                 refresh: true,
                 newPost: true,

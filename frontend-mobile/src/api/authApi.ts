@@ -12,14 +12,10 @@ export const authApi = {
   },
 
   register: async (userData: RegisterData): Promise<User> => {
-    // Para registro, primeiro precisamos estar autenticados
-    // Mas como obter o token? Vamos precisar ajustar depois
     return apiClient.post<User>("/users/register", userData);
   },
 
   logout: async (): Promise<void> => {
-    // Se sua API tiver endpoint de logout
-    // return apiClient.post('/auth/logout');
     return Promise.resolve();
   },
 };

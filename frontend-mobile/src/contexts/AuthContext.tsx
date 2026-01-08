@@ -13,7 +13,7 @@ interface AuthContextData {
   user: User | null;
   isAuthenticated: boolean;
   isProfessor: boolean;
-  loading: boolean; // Renomeado de bootstrapping para loading
+  loading: boolean;
   authLoading: boolean;
   signIn: (
     credentials: LoginCredentials
@@ -35,7 +35,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [bootstrapping, setBootstrapping] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
 
-  // 🔹 Bootstrap inicial (AsyncStorage)
   useEffect(() => {
     const loadStoredUser = async () => {
       try {
@@ -53,7 +52,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loadStoredUser();
   }, []);
 
-  // 🔹 Login
   const signIn = async (
     credentials: LoginCredentials
   ): Promise<{ success: boolean; message: string }> => {
@@ -87,7 +85,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // 🔹 Registro (mantido como no seu fluxo atual)
   const signUp = async (
     userData: RegisterData
   ): Promise<{ success: boolean; message: string }> => {
@@ -107,7 +104,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // 🔹 Logout
   const signOut = async (): Promise<void> => {
     try {
       setAuthLoading(true);
@@ -130,7 +126,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         user,
         isAuthenticated,
         isProfessor,
-        loading: bootstrapping, // Mapeando bootstrapping para loading
+        loading: bootstrapping,
         authLoading,
         signIn,
         signOut,

@@ -9,6 +9,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,15 +37,17 @@ const PostsScreen = () => {
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const searchInputRef = useRef<TextInput>(null);
 
-  // Filtrar posts com base na busca
   const filteredPosts = posts.filter((post) => {
     if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
+    const authorName = typeof post.autor === 'object' && post.autor?.nome ? post.autor.nome :
+      typeof post.autor === 'string' ? post.autor : '';
+
     return (
       post.titulo.toLowerCase().includes(query) ||
       post.conteudo.toLowerCase().includes(query) ||
-      (post.autor?.nome && post.autor.nome.toLowerCase().includes(query))
+      authorName.toLowerCase().includes(query)
     );
   });
 
@@ -133,7 +136,6 @@ const PostsScreen = () => {
       </View>
 
       <View style={styles.headerActions}>
-        {/* Botão de visualizar usuários (disponível para todos logados) */}
         {isAuthenticated && (
           <TouchableOpacity
             onPress={handleManageUsers}
@@ -143,7 +145,6 @@ const PostsScreen = () => {
           </TouchableOpacity>
         )}
 
-        {/* Botão de login/logout */}
         <TouchableOpacity onPress={handleAuthAction} style={styles.authButton}>
           <Ionicons
             name={isAuthenticated ? "log-out-outline" : "log-in-outline"}
@@ -189,8 +190,8 @@ const PostsScreen = () => {
         {isSearching
           ? "Tente buscar com outras palavras"
           : isAuthenticated && user?.role === "professor"
-          ? "Crie o primeiro post!"
-          : "Aguarde os professores criarem posts."}
+            ? "Crie o primeiro post!"
+            : "Aguarde os professores criarem posts."}
       </Text>
       {isSearching && (
         <TouchableOpacity
@@ -211,9 +212,8 @@ const PostsScreen = () => {
         <Text style={styles.statsText}>
           {isSearching
             ? `Mostrando ${filteredPosts.length} de ${posts.length} posts`
-            : `${posts.length} ${
-                posts.length === 1 ? "post" : "posts"
-              } disponíveis`}
+            : `${posts.length} ${posts.length === 1 ? "post" : "posts"
+            } disponíveis`}
         </Text>
         {isSearching && searchQuery.length > 0 && (
           <Text style={styles.searchQueryText}>Buscando: "{searchQuery}"</Text>
@@ -254,7 +254,6 @@ const PostsScreen = () => {
                 : undefined
             }
             showActions={isAuthenticated && user?.role === "professor"}
-            highlightText={searchQuery} // Destacar texto buscado
           />
         )}
         ListHeaderComponent={
@@ -274,10 +273,9 @@ const PostsScreen = () => {
             tintColor="#3498db"
           />
         }
-        stickyHeaderIndices={[0]} // Fixa o header no topo
+        stickyHeaderIndices={[0]}
       />
 
-      {/* Botão flutuante para criar post (apenas professores logados) */}
       {isAuthenticated && user?.role === "professor" && (
         <TouchableOpacity style={styles.fab} onPress={handleCreatePost}>
           <Ionicons name="add" size={28} color="#fff" />

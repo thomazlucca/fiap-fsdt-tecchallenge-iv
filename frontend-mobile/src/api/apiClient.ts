@@ -19,7 +19,6 @@ class ApiClient {
   }
 
   private setupInterceptors(): void {
-    // Request interceptor - Adiciona token automaticamente
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
         try {
@@ -36,7 +35,6 @@ class ApiClient {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor - Trata erros de autenticação
     this.client.interceptors.response.use(
       (response) => {
         console.log("✅", response.status, response.config.url);
@@ -49,10 +47,8 @@ class ApiClient {
           message: error.message,
         });
 
-        // Se token expirou (401), limpar storage
         if (error.response?.status === 401) {
           await AsyncStorage.multiRemove(["@auth_token", "@user_data"]);
-          // Emitir evento de logout (vamos implementar no contexto)
         }
 
         return Promise.reject(error);
@@ -60,8 +56,10 @@ class ApiClient {
     );
   }
 
-  // Métodos HTTP tipados
-  public async get<T>(url: string, config?: InternalAxiosRequestConfig): Promise<T> {
+  public async get<T>(
+    url: string,
+    config?: InternalAxiosRequestConfig
+  ): Promise<T> {
     const response = await this.client.get<T>(url, config);
     return response.data;
   }
@@ -84,7 +82,10 @@ class ApiClient {
     return response.data;
   }
 
-  public async delete<T>(url: string, config?: InternalAxiosRequestConfig): Promise<T> {
+  public async delete<T>(
+    url: string,
+    config?: InternalAxiosRequestConfig
+  ): Promise<T> {
     const response = await this.client.delete<T>(url, config);
     return response.data;
   }

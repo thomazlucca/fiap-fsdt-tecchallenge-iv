@@ -42,7 +42,6 @@ const UserDetailScreen = () => {
   const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
   const [updating, setUpdating] = useState<boolean>(false);
 
-  // Form fields - ADICIONE CAMPOS DE SENHA
   const [editData, setEditData] = useState<UpdateUserDto>({
     nome: "",
     email: "",
@@ -51,7 +50,6 @@ const UserDetailScreen = () => {
   const [novaSenha, setNovaSenha] = useState<string>("");
   const [confirmarSenha, setConfirmarSenha] = useState<string>("");
 
-  // Buscar dados do usuário
   const fetchUserDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -62,7 +60,6 @@ const UserDetailScreen = () => {
         email: data.email,
         role: data.role,
       });
-      // Limpar campos de senha
       setNovaSenha("");
       setConfirmarSenha("");
     } catch (err: any) {
@@ -73,24 +70,19 @@ const UserDetailScreen = () => {
     }
   }, [userId]);
 
-  // Carregar quando a tela ganhar foco
   useFocusEffect(
     useCallback(() => {
       fetchUserDetails();
     }, [fetchUserDetails])
   );
 
-  // Verificar permissões de edição
   const canEditUser = (): boolean => {
     if (!currentUser || !user) return false;
 
-    // Se for o próprio usuário, pode editar
     if (currentUser._id === user._id) return true;
 
-    // Professor pode editar qualquer um
     if (currentUser.role === "professor") return true;
 
-    // Aluno só pode editar outros alunos
     if (currentUser.role === "aluno" && user.role === "aluno") {
       return true;
     }
@@ -98,59 +90,47 @@ const UserDetailScreen = () => {
     return false;
   };
 
-  // Verificar se pode alterar senha
   const canChangePassword = (): boolean => {
     if (!currentUser || !user) return false;
-    
-    // Se for o próprio usuário, pode alterar senha
+
     if (currentUser._id === user._id) return true;
-    
-    // Professor pode alterar senha de qualquer um
+
     if (currentUser.role === "professor") return true;
-    
-    // Aluno só pode alterar senha de outros alunos
+
     if (currentUser.role === "aluno" && user.role === "aluno") {
       return true;
     }
-    
+
     return false;
   };
 
-  // Verificar se pode alterar role
   const canChangeRole = (): boolean => {
     if (!currentUser || !user) return false;
-    
-    // Professor pode alterar role de qualquer um (exceto o próprio)
+
     if (currentUser.role === "professor" && currentUser._id !== user._id) {
       return true;
     }
-    
+
     return false;
   };
 
-  // Verificar se pode excluir
   const canDeleteUser = (): boolean => {
     if (!currentUser || !user) return false;
-    
-    // Não pode excluir a si mesmo
+
     if (currentUser._id === user._id) return false;
-    
-    // Professor pode excluir qualquer um
+
     if (currentUser.role === "professor") return true;
-    
-    // Aluno só pode excluir outros alunos
+
     if (currentUser.role === "aluno" && user.role === "aluno") {
       return true;
     }
-    
+
     return false;
   };
 
-  // Handle update
   const handleUpdateUser = async () => {
     if (!user) return;
 
-    // Validações básicas
     if (!editData.nome?.trim()) {
       Alert.alert("Erro", "O nome é obrigatório");
       return;
@@ -161,7 +141,6 @@ const UserDetailScreen = () => {
       return;
     }
 
-    // Validação de senha se for preenchida
     if (novaSenha || confirmarSenha) {
       if (!canChangePassword()) {
         Alert.alert("Erro", "Você não tem permissão para alterar a senha deste usuário");
@@ -179,20 +158,17 @@ const UserDetailScreen = () => {
       }
     }
 
-    // Preparar dados para envio
     const dadosParaEnviar: UpdateUserDto = {
       nome: editData.nome !== user.nome ? editData.nome : undefined,
       email: editData.email !== user.email ? editData.email : undefined,
       role: editData.role !== user.role ? editData.role : undefined,
     };
 
-    // Adicionar senha se foi preenchida
     if (novaSenha && novaSenha.length >= 6) {
       dadosParaEnviar.senha = novaSenha;
     }
 
-    // Verificar se há alterações
-    const hasChanges = 
+    const hasChanges =
       dadosParaEnviar.nome !== undefined ||
       dadosParaEnviar.email !== undefined ||
       dadosParaEnviar.role !== undefined ||
@@ -206,19 +182,18 @@ const UserDetailScreen = () => {
     try {
       setUpdating(true);
       await userApi.update(userId, dadosParaEnviar);
-      
+
       Alert.alert("Sucesso", "Usuário atualizado com sucesso!");
       fetchUserDetails(); // Recarregar dados
       setEditModalVisible(false);
-      
-      // Limpar campos de senha
+
       setNovaSenha("");
       setConfirmarSenha("");
     } catch (err: any) {
       console.error("Erro ao atualizar usuário:", err);
-      
+
       let errorMessage = "Não foi possível atualizar o usuário";
-      
+
       if (err.response?.status === 401) {
         errorMessage = "Sessão expirada. Faça login novamente.";
       } else if (err.response?.status === 403) {
@@ -226,14 +201,13 @@ const UserDetailScreen = () => {
       } else if (err.response?.data?.message?.includes("email")) {
         errorMessage = "Este email já está em uso";
       }
-      
+
       Alert.alert("Erro", errorMessage);
     } finally {
       setUpdating(false);
     }
   };
 
-  // Handle delete
   const handleDeleteUser = () => {
     if (!user) return;
 
@@ -335,7 +309,6 @@ const UserDetailScreen = () => {
       </View>
 
       <ScrollView style={styles.scrollView}>
-        {/* Avatar e Info Principal */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatarPlaceholder}>
@@ -357,28 +330,26 @@ const UserDetailScreen = () => {
 
           <Text style={styles.userName}>{user.nome}</Text>
           <Text style={styles.userEmail}>{user.email}</Text>
-          
+
           {isCurrentUser && (
             <View style={styles.currentUserBadge}>
               <Ionicons name="person" size={16} color="#fff" />
               <Text style={styles.currentUserText}>Você</Text>
             </View>
           )}
-          
-          {/* Badge de permissões */}
+
           {!isCurrentUser && (
             <View style={styles.permissionBadge}>
               <Ionicons name="shield-outline" size={14} color="#fff" />
               <Text style={styles.permissionBadgeText}>
-                {currentUser?.role === "professor" 
-                  ? "Você tem todas as permissões" 
+                {currentUser?.role === "professor"
+                  ? "Você tem todas as permissões"
                   : "Permissões limitadas"}
               </Text>
             </View>
           )}
         </View>
 
-        {/* Informações Detalhadas */}
         <View style={styles.detailsCard}>
           <Text style={styles.sectionTitle}>Informações do Usuário</Text>
 
@@ -427,10 +398,9 @@ const UserDetailScreen = () => {
           )}
         </View>
 
-        {/* Permissões de Ação */}
         <View style={styles.actionsCard}>
           <Text style={styles.sectionTitle}>Ações</Text>
-          
+
           {canEdit && (
             <TouchableOpacity
               style={styles.actionButton}
@@ -442,8 +412,8 @@ const UserDetailScreen = () => {
               <View style={styles.actionTextContainer}>
                 <Text style={styles.actionTitle}>Editar Usuário</Text>
                 <Text style={styles.actionDescription}>
-                  {isCurrentUser 
-                    ? "Editar seus dados pessoais" 
+                  {isCurrentUser
+                    ? "Editar seus dados pessoais"
                     : `Editar dados de ${user.nome}`}
                   {canChangePasswordPermission && " • Pode alterar senha"}
                 </Text>
@@ -452,7 +422,6 @@ const UserDetailScreen = () => {
             </TouchableOpacity>
           )}
 
-          {/* Botão de excluir */}
           {canDelete && (
             <TouchableOpacity
               style={[styles.actionButton, styles.deleteActionButton]}
@@ -475,7 +444,6 @@ const UserDetailScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Modal de Edição */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -510,7 +478,6 @@ const UserDetailScreen = () => {
                 value={editData.nome || ""}
                 onChangeText={(text) => setEditData({ ...editData, nome: text })}
                 placeholder="Digite o nome"
-                required
               />
 
               <Input
@@ -520,16 +487,14 @@ const UserDetailScreen = () => {
                 placeholder="Digite o email"
                 keyboardType="email-address"
                 autoCapitalize="none"
-                required
               />
 
-              {/* Campos de senha (apenas se tiver permissão) */}
               {canChangePasswordPermission && (
                 <>
                   <View style={styles.sectionDivider}>
                     <Text style={styles.sectionDividerText}>Alterar Senha (Opcional)</Text>
                   </View>
-                  
+
                   <Input
                     label="Nova Senha"
                     value={novaSenha}
@@ -537,7 +502,7 @@ const UserDetailScreen = () => {
                     placeholder="Deixe em branco para não alterar"
                     secureTextEntry
                   />
-                  
+
                   <Input
                     label="Confirmar Nova Senha"
                     value={confirmarSenha}
@@ -545,7 +510,7 @@ const UserDetailScreen = () => {
                     placeholder="Repita a nova senha"
                     secureTextEntry
                   />
-                  
+
                   <View style={styles.passwordInfo}>
                     <Ionicons name="information-circle-outline" size={16} color="#3498db" />
                     <Text style={styles.passwordInfoText}>
@@ -555,7 +520,6 @@ const UserDetailScreen = () => {
                 </>
               )}
 
-              {/* Seletor de Role (apenas para professores editando outros) */}
               {canChangeRolePermission && (
                 <View style={styles.roleSelector}>
                   <Text style={styles.inputLabel}>Tipo de Usuário</Text>
@@ -598,7 +562,6 @@ const UserDetailScreen = () => {
                     setNovaSenha("");
                     setConfirmarSenha("");
                   }}
-                  variant="outline"
                   style={styles.cancelButton}
                 />
                 <Button

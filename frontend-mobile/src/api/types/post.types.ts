@@ -2,7 +2,7 @@ export interface Post {
   _id: string;
   titulo: string;
   conteudo: string;
-  autor: string | { _id: string; nome: string }; // Pode ser string ou objeto
+  autor: string | { _id: string; nome: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -10,7 +10,7 @@ export interface Post {
 export interface CreatePostData {
   titulo: string;
   conteudo: string;
-  autor?: string; // Opcional - backend pega do token
+  autor?: string;
 }
 
 export interface UpdatePostData extends Partial<CreatePostData> {}

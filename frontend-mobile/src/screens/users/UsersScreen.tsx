@@ -38,10 +38,8 @@ const UsersScreen = () => {
     "all"
   );
 
-  // Verificar permissões
   const isProfessor = currentUser?.role === "professor";
 
-  // Buscar usuários
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -55,7 +53,6 @@ const UsersScreen = () => {
     }
   }, []);
 
-  // Recarregar quando a tela ganhar foco
   useFocusEffect(
     useCallback(() => {
       fetchUsers();
@@ -67,28 +64,23 @@ const UsersScreen = () => {
   };
 
   const handleUserPress = (user: User): void => {
-    // Verificar se pode editar este usuário
     const canEditUser = () => {
       if (!currentUser) return false;
-      
-      // Se for o próprio usuário, pode editar
+
       if (currentUser._id === user._id) return true;
-      
-      // Professor pode editar qualquer um
+
       if (isProfessor) return true;
-      
-      // Aluno só pode editar outros alunos
+
       if (currentUser.role === "aluno" && user.role === "aluno") {
         return true;
       }
-      
+
       return false;
     };
-    
+
     if (canEditUser()) {
       navigation.navigate("UserDetail", { userId: user._id });
     } else {
-      // Mostrar informações básicas sem opção de editar
       Alert.alert(
         user.nome,
         `Email: ${user.email}\nTipo: ${user.role === "professor" ? "Professor" : "Aluno"}\n\nApenas professores podem editar outros professores.`,
@@ -103,68 +95,60 @@ const UsersScreen = () => {
     setRefreshing(false);
   };
 
-  // Verificar se pode excluir usuário
   const canDeleteUser = (userId: string, userRole: string): boolean => {
-  if (!currentUser) return false;
-  
-  // Não pode excluir a si mesmo
-  if (userId === currentUser._id) return false;
-  
-  // Professor pode excluir qualquer um
-  if (isProfessor) return true;
-  
-  // Aluno só pode excluir outros alunos
-  if (currentUser.role === "aluno" && userRole === "aluno") {
-    return true;
-  }
-  
-  return false;
-};
+    if (!currentUser) return false;
 
-  // Excluir usuário
-  const handleDeleteUser = useCallback(
-  async (userId: string, userName: string, userRole: string) => {
-    if (!canDeleteUser(userId, userRole)) {
-      Alert.alert(
-        "Ação não permitida",
-        "Você não tem permissão para excluir este usuário"
-      );
-      return;
+    if (userId === currentUser._id) return false;
+
+    if (isProfessor) return true;
+
+    if (currentUser.role === "aluno" && userRole === "aluno") {
+      return true;
     }
 
-    Alert.alert(
-      "Excluir Usuário",
-      `Tem certeza que deseja excluir ${userName}?`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await userApi.delete(userId);
-              Alert.alert("Sucesso", "Usuário excluído com sucesso!");
-              fetchUsers(); // Recarregar lista
-            } catch (err: any) {
-              Alert.alert("Erro", "Não foi possível excluir o usuário");
-              console.error("Erro ao excluir usuário:", err);
-            }
-          },
-        },
-      ]
-    );
-  },
-  [currentUser, fetchUsers]
-);
+    return false;
+  };
 
-  // Filtrar usuários
+  const handleDeleteUser = useCallback(
+    async (userId: string, userName: string, userRole: string) => {
+      if (!canDeleteUser(userId, userRole)) {
+        Alert.alert(
+          "Ação não permitida",
+          "Você não tem permissão para excluir este usuário"
+        );
+        return;
+      }
+
+      Alert.alert(
+        "Excluir Usuário",
+        `Tem certeza que deseja excluir ${userName}?`,
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Excluir",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await userApi.delete(userId);
+                Alert.alert("Sucesso", "Usuário excluído com sucesso!");
+                fetchUsers(); // Recarregar lista
+              } catch (err: any) {
+                Alert.alert("Erro", "Não foi possível excluir o usuário");
+                console.error("Erro ao excluir usuário:", err);
+              }
+            },
+          },
+        ]
+      );
+    },
+    [currentUser, fetchUsers]
+  );
+
   const filteredUsers = users.filter((user) => {
-    // Filtrar por role
     if (filterRole !== "all" && user.role !== filterRole) {
       return false;
     }
 
-    // Filtrar por busca
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       return (
@@ -176,7 +160,6 @@ const UsersScreen = () => {
     return true;
   });
 
-  // Estatísticas
   const stats = {
     total: users.length,
     professores: users.filter((u) => u.role === "professor").length,
@@ -184,10 +167,8 @@ const UsersScreen = () => {
   };
 
   const renderUserItem = ({ item }: { item: User }) => {
-    // Verificar se pode excluir este usuário
     const showDeleteButton = canDeleteUser(item._id, item.role);
-    
-    // Verificar se pode editar (para badge visual)
+
     const canEdit = () => {
       if (!currentUser) return false;
       if (currentUser._id === item._id) return true;
@@ -238,7 +219,6 @@ const UsersScreen = () => {
           </View>
         </View>
 
-        {/* Botão de excluir (apenas para professores e não para si mesmo) */}
         {showDeleteButton && (
           <TouchableOpacity
             style={styles.deleteButton}
@@ -276,7 +256,6 @@ const UsersScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Estatísticas */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>{stats.total}</Text>
@@ -296,7 +275,6 @@ const UsersScreen = () => {
         </View>
       </View>
 
-      {/* Filtros */}
       <View style={styles.filterContainer}>
         <Text style={styles.filterTitle}>Filtrar:</Text>
         <View style={styles.filterButtons}>
@@ -318,15 +296,14 @@ const UsersScreen = () => {
                 {role === "all"
                   ? "Todos"
                   : role === "professor"
-                  ? "Professores"
-                  : "Alunos"}
+                    ? "Professores"
+                    : "Alunos"}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Busca */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Ionicons name="search-outline" size={20} color="#7f8c8d" />
@@ -345,7 +322,6 @@ const UsersScreen = () => {
         </View>
       </View>
 
-      {/* Aviso de permissões */}
       {!isProfessor && (
         <View style={styles.permissionWarning}>
           <Ionicons name="information-circle-outline" size={18} color="#3498db" />
@@ -355,7 +331,6 @@ const UsersScreen = () => {
         </View>
       )}
 
-      {/* Lista de usuários */}
       <FlatList
         data={filteredUsers}
         renderItem={renderUserItem}
@@ -379,8 +354,7 @@ const UsersScreen = () => {
           </View>
         }
       />
-      
-      {/* Botão flutuante para criar usuário (apenas professores) */}
+
       {currentUser && (
         <TouchableOpacity style={styles.fab} onPress={handleCreateUser}>
           <Ionicons name="person-add" size={24} color="#fff" />

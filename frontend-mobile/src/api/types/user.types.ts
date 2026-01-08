@@ -20,5 +20,3 @@ export interface UpdateUserDto {
   senha?: string;
   role?: "aluno" | "professor";
 }
-
-// Adicione ao arquivo api.types.ts se preferir

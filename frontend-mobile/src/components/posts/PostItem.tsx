@@ -8,7 +8,7 @@ interface PostItemProps {
   onPress: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
-  showActions?: boolean; // Controla se mostra botões de editar/excluir
+  showActions?: boolean;
 }
 
 const PostItem: React.FC<PostItemProps> = ({
@@ -16,9 +16,8 @@ const PostItem: React.FC<PostItemProps> = ({
   onPress,
   onEdit,
   onDelete,
-  showActions = false, // Padrão: não mostrar ações
+  showActions = false,
 }) => {
-  // Função para extrair o nome do autor
   const getAuthorName = (): string => {
     if (!post.autor) return "Autor desconhecido";
 
@@ -65,7 +64,6 @@ const PostItem: React.FC<PostItemProps> = ({
         </Text>
       </View>
 
-      {/* MOSTRAR AÇÕES APENAS SE showActions = true */}
       {showActions && (
         <View style={styles.actions}>
           <TouchableOpacity
@@ -93,7 +91,6 @@ const PostItem: React.FC<PostItemProps> = ({
   );
 };
 
-// Mantenha os styles...
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",

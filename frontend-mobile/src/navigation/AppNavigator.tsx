@@ -3,7 +3,6 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../contexts/AuthContext";
 
-// Screens
 import PostsScreen from "../screens/posts/PostsScreen";
 import PostDetailScreen from "../screens/posts/PostDetailScreen";
 import CreateEditPostScreen from "../screens/posts/CreateEditPostScreen";
@@ -11,13 +10,12 @@ import LoginScreen from "../screens/auth/LoginScreen";
 import RegisterScreen from "../screens/auth/RegisterScreen";
 import UsersScreen from "../screens/users/UsersScreen";
 import UserDetailScreen from "../screens/users/UserDetailScreen";
-import TestConnectionScreen from "../screens/TestConnectionScreen";
 import CreateUserScreen from "../screens/users/CreateUserScreen";
 
 export type RootStackParamList = {
   Posts:
-    | { refresh?: boolean; updatedPostId?: string; newPost?: boolean }
-    | undefined;
+  | { refresh?: boolean; updatedPostId?: string; newPost?: boolean }
+  | undefined;
   PostDetail: { postId: string };
   Login: undefined;
   Register: undefined;
@@ -32,11 +30,10 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator: React.FC = () => {
-  const { user, loading } = useAuth(); // Mudei para pegar user completo
+  const { user, loading } = useAuth();
 
-  // ⏳ Aguarda carregar usuário do AsyncStorage
   if (loading) {
-    return null; // pode colocar splash depois
+    return null;
   }
 
   const isProfessor = user?.role === "professor";
@@ -52,7 +49,6 @@ const AppNavigator: React.FC = () => {
           headerTitleStyle: { fontWeight: "bold" },
         }}
       >
-        {/* TELAS PÚBLICAS */}
         <Stack.Screen
           name="Posts"
           component={PostsScreen}
@@ -71,13 +67,6 @@ const AppNavigator: React.FC = () => {
           options={{ title: "Login" }}
         />
 
-        {/* <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{ title: "Criar Conta" }}
-        /> */}
-
-        {/* TELA USERS - disponível para todos logados */}
         <Stack.Screen
           name="Users"
           component={UsersScreen}
@@ -90,7 +79,6 @@ const AppNavigator: React.FC = () => {
           options={{ title: "Detalhes do Usuário" }}
         />
 
-        {/* 🔐 TELAS RESTRITAS (somente professor) */}
         {isProfessor && (
           <>
             <Stack.Screen
@@ -106,7 +94,7 @@ const AppNavigator: React.FC = () => {
             />
           </>
         )}
-        
+
         <Stack.Screen
           name="CreateUser"
           component={CreateUserScreen}

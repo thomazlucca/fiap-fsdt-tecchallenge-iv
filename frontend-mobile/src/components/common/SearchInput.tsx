@@ -1,4 +1,3 @@
-// src/components/common/SearchInput.tsx
 import React, { useState, useEffect, forwardRef } from "react";
 import {
   View,
@@ -19,11 +18,10 @@ const SearchInput = forwardRef<TextInput, SearchInputProps>(
   ({ onSearch, placeholder = "Buscar...", isLoading = false }, ref) => {
     const [query, setQuery] = useState("");
 
-    // Debounce para buscar
     useEffect(() => {
       const timer = setTimeout(() => {
         onSearch(query);
-      }, 500); // 500ms de debounce
+      }, 500);
 
       return () => clearTimeout(timer);
     }, [query, onSearch]);

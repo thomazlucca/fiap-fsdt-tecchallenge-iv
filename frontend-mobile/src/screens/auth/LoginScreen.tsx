@@ -116,19 +116,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               style={styles.loginButton}
             />
 
-            {/* <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OU</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <Button
-              title="Criar uma conta"
-              onPress={handleRegister}
-              type="outline"
-              disabled={loading}
-            /> */}
-
             <View style={styles.helpText}>
               <Text style={styles.helpTextContent}>
                 Use as credenciais do usuário criado no seed para testar
